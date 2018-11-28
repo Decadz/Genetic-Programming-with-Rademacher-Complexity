@@ -1,5 +1,5 @@
 __author__ = "Christian Raymond"
-__date__ = "27 November 2018"
+__date__ = "28 November 2018"
 
 
 import numpy as np
@@ -38,6 +38,20 @@ data_2 = "../data/regression-2.csv"
 
 data = load_data(data_1)
 toolbox = base.Toolbox()
+
+
+def main():
+
+    """
+    Genetic Programming for Symbolic Regression, initialises and executes
+    the algorithm. (Ensure load_data() points to the right file path).
+    """
+
+    # Create and set up genetic program.
+    initialise_algorithm()
+
+    # Execute the genetic program.
+    execute_algorithm()
 
 
 def initialise_algorithm():
@@ -82,8 +96,8 @@ def initialise_algorithm():
 def execute_algorithm():
 
     """
-    Sets up the statistics and output of the genetic program, before executing the genetic program
-    output of program visible in console.
+    Sets up the statistics and output of the genetic program, before executing
+    the genetic program output of program visible in console.
     """
 
     population = toolbox.population(n=size_population)
@@ -175,8 +189,8 @@ def fitness_function_sse(individual):
 def fitness_function_mse(individual):
 
     """
-    Calculates the fitness of a candidate solution/individual by using the mean of
-    the squared errors (MSE).
+    Calculates the fitness of a candidate solution/individual by using the mean
+    of the squared errors (MSE).
 
     :param individual: Candidate Solution
     :return: Fitness Value
@@ -200,9 +214,4 @@ def fitness_function_mse(individual):
 
 
 if __name__ == "__main__":
-
-    # Create and set up genetic program.
-    initialise_algorithm()
-
-    # Execute the genetic program.
-    execute_algorithm()
+    main()
