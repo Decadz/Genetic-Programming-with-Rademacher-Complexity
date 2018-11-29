@@ -1,5 +1,5 @@
 __author__ = "Christian Raymond"
-__date__ = "28 November 2018"
+__date__ = "29 November 2018"
 
 
 import numpy as np
@@ -43,8 +43,8 @@ toolbox = base.Toolbox()
 def main():
 
     """
-    Genetic Programming for Symbolic Regression, initialises and executes
-    the algorithm. (Ensure load_data() points to the right file path).
+    Pareto Parsimony Pressure Genetic Programming for Symbolic Regression, initialises
+    and executes the algorithm. (Ensure load_data() points to the right file path).
     """
 
     # Create and set up genetic program.
@@ -74,7 +74,7 @@ def initialise_algorithm():
     pset.addEphemeralConstant("randomTerm", lambda: round(rd.uniform(random_lower, random_upper), 4))
 
     # Tell the algorithm that we are trying to minimise the fitness function.
-    creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+    creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
     creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin, pset=pset)
 
     toolbox.register("expr", gp.genHalfAndHalf, pset=pset, min_=1, max_=2)
@@ -82,8 +82,10 @@ def initialise_algorithm():
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("compile", gp.compile, pset=pset)
 
+    # Need to use either SPEA (Strength Pareto Evolutionary Algorithm) or
+    # NSGA (Non-dominated Sorting Genetic Algorithm) for multi-objective.
+    toolbox.register("select", tools.selNSGA2)
     toolbox.register("evaluate", fitness_function_ae)
-    toolbox.register("select", tools.selTournament, tournsize=3)
     toolbox.register("mate", gp.cxOnePoint)
     toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
     toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
@@ -101,18 +103,18 @@ def execute_algorithm():
     """
 
     population = toolbox.population(n=size_population)
-    halloffame = tools.HallOfFame(1)
+    halloffame = tools.ParetoFront()
 
     # What stat are going to be seen in the console.
     stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
     stats_size = tools.Statistics(len)
 
     # What metrics are going to be display to the console.
-    mstats = tools.MultiStatistics(fitness=stats_fit, size=stats_size)
-    mstats.register("max", np.max)
-    mstats.register("mean", np.mean)
-    mstats.register("std", np.std)
-    mstats.register("min", np.min)
+    mstats = tools.MultiStatistics(fitness=stats_fit)
+    mstats.register("max", np.max, axis=0)
+    mstats.register("mean", np.mean, axis=0)
+    mstats.register("std", np.std, axis=0)
+    mstats.register("min", np.min, axis=0)
 
     # Run the genetic programming algorithm.
     population, statistics = algorithms.eaSimple(population, toolbox, cxpb=prob_crossover, mutpb=prob_mutation,
@@ -140,7 +142,8 @@ def fitness_function_ae(individual):
     value of the errors (AE).
 
     :param individual: Candidate Solution
-    :return: Fitness Value
+    :return: Fitness Value (Error)
+    :return: Size of Individual
     """
 
     # Converts the expression tree into a callable function.
@@ -157,7 +160,7 @@ def fitness_function_ae(individual):
         total_error += error
 
     # Must return the value as a list object.
-    return [total_error]
+    return total_error, len(individual)
 
 
 def fitness_function_sse(individual):
@@ -167,7 +170,8 @@ def fitness_function_sse(individual):
     the squared errors (SSE).
 
     :param individual: Candidate Solution
-    :return: Fitness Value
+    :return: Fitness Value (Error)
+    :return: Size of Individual
     """
 
     # Converts the expression tree into a callable function.
@@ -184,7 +188,7 @@ def fitness_function_sse(individual):
         total_error += error
 
     # Must return the value as a list object.
-    return [total_error]
+    return total_error, len(individual)
 
 
 def fitness_function_mse(individual):
@@ -194,7 +198,8 @@ def fitness_function_mse(individual):
     of the squared errors (MSE).
 
     :param individual: Candidate Solution
-    :return: Fitness Value
+    :return: Fitness Value (Error)
+    :return: Size of Individual
     """
 
     # Converts the expression tree into a callable function.
@@ -211,7 +216,7 @@ def fitness_function_mse(individual):
         total_error += error
 
     # Must return the value as a list object.
-    return [total_error/data.shape[0]]
+    return total_error/data.shape[0], len(individual)
 
 
 if __name__ == "__main__":

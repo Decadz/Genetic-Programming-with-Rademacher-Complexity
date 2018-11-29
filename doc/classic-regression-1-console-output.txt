@@ -1,4 +1,4 @@
-  	      	            fitness            	              size
+   	      	            fitness            	              size
    	      	-------------------------------	-------------------------------
 gen	nevals	max    	mean   	min    	std    	max	mean   	min	std
 0  	300   	1785.68	170.328	60.4912	109.705	7  	4.69333	3  	1.84372
@@ -302,6 +302,6 @@ gen	nevals	max    	mean   	min    	std    	max	mean   	min	std
 298	224   	2629.67	65.2975	1.83504	172.604	69 	33.62  	3  	9.60151
 299	192   	1027.86	56.7555	1.83504	114.368	67 	34.5267	3  	8.62879
 300	204   	2717.42	72.8475	1.83504	196.49 	61 	34.76  	1  	8.53673
-
 Best Solution: multiply(add(division(add(division(multiply(add(subtract(add(1.2002, subtract(ARG0, 2.1904)), 2.1904), subtract(add(ARG0, subtract(ARG0, 2.152)), subtract(3.0704, multiply(1.2002, ARG0)))), multiply(ARG0, ARG0)), 1.2002), division(4.1675, multiply(1.2002, ARG0))), 3.4724), ARG0), ARG0)
 Solution Fitness: (1.8350359967811292,)
+Solution Size: 37
