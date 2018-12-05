@@ -1,9 +1,15 @@
 __author__ = "Christian Raymond"
-__date__ = "29 November 2018"
+__date__ = "05 November 2018"
 
+"""
+A classic implementation of Genetic Programming for Symbolic Regression.
+This program aims to map the input data to the output data through the use
+of a symbolic representation (expression trees) and evolutionary techniques.
+"""
 
 import numpy as np
 import random as rd
+import pandas as pd
 import operator
 
 from utility.loader import load_data
@@ -16,16 +22,20 @@ from deap import tools
 from deap import gp
 
 
+# All results should be sent to this output folder.
+output_path = "../output/benchmark_classic/"
+
+
 # Setting the seed (for reproducibility).
 np.random.seed(2018)
 rd.seed(2018)
 
 # Genetic Operators.
-prob_crossover = 0.7
+prob_crossover = 0.9
 prob_mutation = 0.1
 
 # Population and Generations.
-num_generations = 300
+num_generations = 30
 size_population = 300
 
 # Random terminal limits.
@@ -43,8 +53,8 @@ toolbox = base.Toolbox()
 def main():
 
     """
-    Pareto Parsimony Pressure Genetic Programming for Symbolic Regression, initialises
-    and executes the algorithm. (Ensure load_data() points to the right file path).
+    Genetic Programming for Symbolic Regression, initialises and executes
+    the algorithm. (Ensure load_data() points to the right file path).
     """
 
     # Create and set up genetic program.
@@ -74,7 +84,7 @@ def initialise_algorithm():
     pset.addEphemeralConstant("randomTerm", lambda: round(rd.uniform(random_lower, random_upper), 4))
 
     # Tell the algorithm that we are trying to minimise the fitness function.
-    creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
+    creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
     creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin, pset=pset)
 
     toolbox.register("expr", gp.genHalfAndHalf, pset=pset, min_=1, max_=2)
@@ -82,10 +92,8 @@ def initialise_algorithm():
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("compile", gp.compile, pset=pset)
 
-    # Need to use either SPEA (Strength Pareto Evolutionary Algorithm) or
-    # NSGA (Non-dominated Sorting Genetic Algorithm) for multi-objective.
-    toolbox.register("select", tools.selNSGA2)
     toolbox.register("evaluate", fitness_function_ae)
+    toolbox.register("select", tools.selTournament, tournsize=3)
     toolbox.register("mate", gp.cxOnePoint)
     toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
     toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
@@ -103,22 +111,27 @@ def execute_algorithm():
     """
 
     population = toolbox.population(n=size_population)
-    halloffame = tools.ParetoFront()
+    halloffame = tools.HallOfFame(1)
 
     # What stat are going to be seen in the console.
     stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
     stats_size = tools.Statistics(len)
 
     # What metrics are going to be display to the console.
-    mstats = tools.MultiStatistics(fitness=stats_fit)
-    mstats.register("max", np.max, axis=0)
-    mstats.register("mean", np.mean, axis=0)
-    mstats.register("std", np.std, axis=0)
-    mstats.register("min", np.min, axis=0)
+    mstats = tools.MultiStatistics(fitness=stats_fit, size=stats_size)
+    mstats.register("max", np.max)
+    mstats.register("mean", np.mean)
+    mstats.register("std", np.std)
+    mstats.register("min", np.min)
 
     # Run the genetic programming algorithm.
-    population, statistics = algorithms.eaSimple(population, toolbox, cxpb=prob_crossover, mutpb=prob_mutation,
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=prob_crossover, mutpb=prob_mutation,
                                   ngen=num_generations, stats=mstats, halloffame=halloffame, verbose=True)
+
+    logbook.log_header = False
+    [print(logbook)]
+    df = pd.DataFrame(logbook)
+    df.to_csv(output_path + "temp.csv", index=False)  # TODO
 
     # Display the information about the best solution.
     print("Best Solution:", halloffame[0])
@@ -142,8 +155,7 @@ def fitness_function_ae(individual):
     value of the errors (AE).
 
     :param individual: Candidate Solution
-    :return: Fitness Value (Error)
-    :return: Size of Individual
+    :return: Fitness Value
     """
 
     # Converts the expression tree into a callable function.
@@ -160,7 +172,7 @@ def fitness_function_ae(individual):
         total_error += error
 
     # Must return the value as a list object.
-    return total_error, len(individual)
+    return [total_error]
 
 
 def fitness_function_sse(individual):
@@ -170,8 +182,7 @@ def fitness_function_sse(individual):
     the squared errors (SSE).
 
     :param individual: Candidate Solution
-    :return: Fitness Value (Error)
-    :return: Size of Individual
+    :return: Fitness Value
     """
 
     # Converts the expression tree into a callable function.
@@ -188,7 +199,7 @@ def fitness_function_sse(individual):
         total_error += error
 
     # Must return the value as a list object.
-    return total_error, len(individual)
+    return [total_error]
 
 
 def fitness_function_mse(individual):
@@ -198,8 +209,7 @@ def fitness_function_mse(individual):
     of the squared errors (MSE).
 
     :param individual: Candidate Solution
-    :return: Fitness Value (Error)
-    :return: Size of Individual
+    :return: Fitness Value
     """
 
     # Converts the expression tree into a callable function.
@@ -216,7 +226,7 @@ def fitness_function_mse(individual):
         total_error += error
 
     # Must return the value as a list object.
-    return total_error/data.shape[0], len(individual)
+    return [total_error/data.shape[0]]
 
 
 if __name__ == "__main__":
