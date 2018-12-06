@@ -1,25 +1,27 @@
 import numpy as np
 from math import sqrt
 
+import algorithms.config as config
+
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import median_absolute_error
 from sklearn.metrics import r2_score
 
 
-def evaluate_population(generation_num, populations_fitnesses, populations_sizes, individual, func, testing_data):
+def evaluate_population(generation_num, generation_time, populations_fitnesses, populations_sizes, individual, func):
 
     """
 
     :param generation_num:
+    :param generation_time:
     :param populations_fitnesses:
     :param populations_sizes:
     :param individual:
     :param func:
-    :param testing_data:
     :return:
     """
 
-    statistics = [generation_num + 1]
+    statistics = [generation_num + 1, generation_time]
 
     fitness_min = np.percentile(populations_fitnesses, 0)
     fitness_lq = np.percentile(populations_fitnesses, 25)
@@ -46,9 +48,9 @@ def evaluate_population(generation_num, populations_fitnesses, populations_sizes
     pred = []  # List of predicted values.
     real = []  # List of ground truth values.
 
-    for rows in range(testing_data.shape[0]):
-        pred.append(func(*(testing_data.values[rows][0:testing_data.shape[1] - 1])))
-        real.append(testing_data.values[rows][testing_data.shape[1] - 1])
+    for rows in range(config.testing_data.shape[0]):
+        pred.append(func(*(config.testing_data.values[rows][0:config.testing_data.shape[1] - 1])))
+        real.append(config.testing_data.values[rows][config.testing_data.shape[1] - 1])
 
     mse = mean_squared_error(real, pred)
     rmse = sqrt(mean_squared_error(real, pred))
