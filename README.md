@@ -17,7 +17,7 @@
 - Multi-Objective Parsimony-Linearity-Fitness Genetic Programming
 - Rademacher Complexity Genetic Programming
 
-###[Data](https://github.com/Decadz/Genetic-Programming-for-Symbolic-Regression/tree/master/data)
+### [Data](https://github.com/Decadz/Genetic-Programming-for-Symbolic-Regression/tree/master/data)
 
 - [CCN](https://github.com/Decadz/Genetic-Programming-for-Symbolic-Regression/tree/master/data/ccn)
 - [CCUN](https://github.com/Decadz/Genetic-Programming-for-Symbolic-Regression/tree/master/data/ccun)
@@ -27,4 +27,4 @@
 
 ---
 
-###[Results](https://github.com/Decadz/Genetic-Programming-for-Symbolic-Regression/tree/master/output)
+### [Results](https://github.com/Decadz/Genetic-Programming-for-Symbolic-Regression/tree/master/output)
