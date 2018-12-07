@@ -24,6 +24,9 @@ split_size = 0.3
 # Path to reproducibility seeds.
 seed = "../data/seed.csv"
 
+# Loading the seed values from file
+seeds = pd.read_csv(seed, header=None)
+
 # Path to regression data-sets.
 ccn_train = "../data/ccn/ccn-training.csv"
 ccn_test = "../data/ccn/ccn-testing.csv"

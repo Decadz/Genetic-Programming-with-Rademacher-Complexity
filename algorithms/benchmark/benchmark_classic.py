@@ -196,7 +196,7 @@ pset.addPrimitive(np.multiply, 2)
 pset.addPrimitive(division, 2)
 
 # Adding some random terminals between a set range with a set #dp.
-pset.addEphemeralConstant("randomTerm", lambda: round(np.random.uniform(config.random_lower, config.random_upper), 4))
+pset.addEphemeralConstant("randomTerm1", lambda: round(np.random.uniform(config.random_lower, config.random_upper), 4))
 
 # Tell the algorithm that we are trying to minimise the fitness function.
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
