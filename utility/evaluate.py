@@ -16,8 +16,8 @@ def evaluate_population(generation_num, generation_time, populations_fitnesses, 
     :param generation_time:
     :param populations_fitnesses:
     :param populations_sizes:
-    :param individual:
-    :param func:
+    :param individual: The best individual
+    :param func: The best function (compiled individual)
     :return:
     """
 
