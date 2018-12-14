@@ -1,22 +1,23 @@
 import pandas as pd
 
 # Number of executions of the algorithm.
-executions = 1
+executions = 5
 
 # Genetic Operators.
 prob_crossover = 0.9
 prob_mutation = 0.1
+prob_elitism = 0.1
 
 # Max height of genetic operators.
-max_height = 20
+max_height = 10
 
 # Population and Generations.
-num_generations = 300
-size_population = 300
+num_generations = 30
+size_population = 30
 
 # Random terminal limits.
-random_upper = 5
-random_lower = 1
+random_upper = 1
+random_lower = -1
 
 # Train-Test split size.
 split_size = 0.3

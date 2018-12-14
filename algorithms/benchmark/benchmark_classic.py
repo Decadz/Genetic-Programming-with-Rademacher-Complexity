@@ -33,7 +33,7 @@ def execute_algorithm():
     """
 
     population = toolbox.population(n=config.size_population)
-    halloffame = tools.HallOfFame(1)
+    halloffame = tools.HallOfFame(config.size_population * config.prob_elitism)
     statistics = []
 
     # Begin the evolution process.
@@ -49,30 +49,43 @@ def execute_algorithm():
         # Update the hall of fame.
         halloffame.update(population)
 
-        # Gather all the fitnesses and size information about the population.
+        # Gather all the fitness's and size information about the population.
         fits = [individual.fitness.values[0] for individual in population]
         size = [len(individual) for individual in population]
 
-        # Select the next generation of individuals and clone.
-        next_gen = toolbox.select(population, config.size_population)
+        # Cloning the population before performing genetic operators.
+        next_gen = toolbox.select(population, config.size_population + 1)
         next_gen = list(map(toolbox.clone, next_gen))
 
-        # Apply crossover genetic operators.
-        for i in range(1, config.size_population, 2):
-            if np.random.random() < config.prob_crossover:
-                next_gen[i - 1], next_gen[i] = toolbox.mate(next_gen[i - 1], next_gen[i])
-                del next_gen[i - 1].fitness.values
-                del next_gen[i].fitness.values
+        children = []
 
-        # Apply mutation genetic operators.
-        for mutant in next_gen:
-            if np.random.random() < config.prob_mutation:
-                toolbox.mutate(mutant)
-                del mutant.fitness.values
+        # Performing elitism genetic operator.
+        for index in range(len(halloffame)):
+            children.append(halloffame[index])
 
-        # The population is entirely replaced by the offspring
-        population[:] = next_gen
+        # Populating the rest of the next generation with crossover and mutation.
+        while len(children) < config.size_population:
 
+            # Generating a number to determine what genetic operator.
+            rng = np.random.random()
+
+            # Performing crossover genetic operator.
+            if rng < config.prob_crossover:
+                index1 = len(children)
+                index2 = len(children) + 1
+                next_gen[index1], next_gen[index2] = toolbox.mate(next_gen[index1], next_gen[index2])
+                del next_gen[index1].fitness.values
+                del next_gen[index2].fitness.values
+                children.extend((next_gen[index1], next_gen[index2]))
+
+            # Performing mutation genetic operator.
+            elif rng < config.prob_crossover + config.prob_mutation:
+                index = len(children)
+                toolbox.mutate(next_gen[index])
+                del next_gen[index].fitness.values
+                children.append(next_gen[index])
+
+        population = children  # The population is entirely replaced by the offspring
         end_time = time.clock()  # Records the time at the end of the generation.
 
         # Evaluates the population and returns statistics.
@@ -210,7 +223,7 @@ toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.ex
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("compile", gp.compile, pset=pset)
 
-toolbox.register("select", tools.selTournament, tournsize=3)
+toolbox.register("select", tools.selTournament, tournsize=2)
 toolbox.register("evaluate", fitness_function_mse, data=config.training_data, toolbox=toolbox)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)

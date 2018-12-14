@@ -24,20 +24,7 @@ data_name = "experimental"
 
 def main():
 
-    # TODO: Questions to raise in individual supervisor meeting:
-    # - Is enough data being captured (see ..utility/evaluate.py), and is the formatting acceptable.
-    # - What diagrams should I create for the paper.
-
-    # - Which selection algorithm should be used in the benchmarks (currently NSGA2 for multi, tournament for single).
-    #   NSGA2 has built in diversity management with its use of crowding distance (potential problem for idea 1?)
-
-    # - How to fix DEAP hypervolume module "Falling back to the python version of hypervolume module."
-    # - How long should it take to execute GP with the current parameters.
-
-    # - Should selection be using a K value = to the population size as shown in all DEAP examples.
-    # - Is setting a max height for genetic operators a bad thing on benchmarks.
-    # - What random terminal node value range should I use (upper and lower bounds).
-
+    # TODO - Implement elitesm.
 
     # Loading the desired data-set.
     train_data = pd.read_csv(data_path_train, header=None)
@@ -54,11 +41,11 @@ def main():
     #run_benchmark_spea2_parsimony()
 
     # Experimental Genetic Programming Algorithms.
+    run_experimental_rademacher_complexity()
     #run_experimental_diversity()                   # TODO - Implement Algorithm
     #run_experimental_pareto_dimensionality()       # TODO - Implement Algorithm
     #run_experimental_spea2_simplification()        # TODO - Implement Algorithm
     #run_experimental_pareto_parsimony_linearity()  # TODO - Implement Algorithm
-    #run_experimental_rademacher_complexity()       # TODO - Implement Algorithm
 
 
 """
