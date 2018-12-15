@@ -24,8 +24,6 @@ data_name = "experimental"
 
 def main():
 
-    # TODO - Implement elitesm.
-
     # Loading the desired data-set.
     train_data = pd.read_csv(data_path_train, header=None)
     test_data = pd.read_csv(data_path_test, header=None)

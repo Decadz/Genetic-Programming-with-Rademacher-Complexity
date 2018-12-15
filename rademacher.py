@@ -49,14 +49,14 @@ def rademacher_estimate(training_vector, classifier):
         # Adding the upper bound to the totals list.
         totals.append(max(bounds))
 
-        #print("==========================================================================")
-        #print("Bounds:", bounds)
-        #print("Upper Bounds:", max(bounds))
-        #print("Iteration:", i)
-        #print("==========================================================================")
-        #print()
+        print("==========================================================================")
+        print("Bounds:", bounds)
+        print("Upper Bounds:", max(bounds))
+        print("Iteration:", i)
+        print("==========================================================================")
+        print()
 
-    return sum(totals) / iterations  # Averaging all the upper bounds to come up with the best estimate.
+    return sum(totals)/iterations  # Averaging all the upper bounds to come up with the best estimate.
 
 
 def rademacher_random_variable(number):
@@ -101,12 +101,12 @@ class Classifier:
         # Divide by size to push the number between 1 and -1.
         correlation = dot_product / size
 
-        #print("Training Vector:", training_vector)
-        #print("Rademacher Vector:", random_vector)
-        #print("Hypothesis Vector:", hypothesis_vector)
-        #print("Dot Product:", dot_product)
-        #print("Correlation:", correlation)
-        #print()
+        print("Training Vector:", training_vector)
+        print("Rademacher Vector:", random_vector)
+        print("Hypothesis Vector:", hypothesis_vector)
+        print("Dot Product:", dot_product)
+        print("Correlation:", correlation)
+        print()
 
         return correlation
 

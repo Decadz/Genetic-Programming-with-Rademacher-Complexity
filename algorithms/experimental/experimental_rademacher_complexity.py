@@ -120,7 +120,7 @@ def rademacher_estimate(training_vector, classifier):
 
     totals = list()  # List of upper bounds from each iteration.
 
-    for i in range(num_samples):  # Iterating multiple times to get a good approximation.
+    for i in range(num_estimate_samples):  # Iterating multiple times to get a good approximation.
 
         # Generate a tuple of random_vector - random variables (+1, -1)
         random_vector = rademacher_random_variable(len(training_vector))
@@ -138,7 +138,7 @@ def rademacher_estimate(training_vector, classifier):
         print("==========================================================================")
         print()
 
-    return sum(totals)/num_samples  # Averaging all the upper bounds to come up with the best estimate.
+    return sum(totals)/num_estimate_samples  # Averaging all the upper bounds to come up with the best estimate.
 
 
 def rademacher_random_variable(size):
@@ -267,6 +267,9 @@ def fitness_function_mse(individual, data, toolbox):
     func = toolbox.compile(expr=individual)
     total_error = 0
 
+    upper_range = float("inf")
+    lower_range = float("-inf")
+
     for rows in range(data.shape[0]):
 
         # Uses splat operator to convert array into positional arg.
@@ -277,7 +280,12 @@ def fitness_function_mse(individual, data, toolbox):
         total_error += error
 
     # Must return the value as a list object.
-    return [total_error/data.shape[0]]
+    mse = [total_error/data.shape[0]]
+
+    # Need to get the range of the output on training and convert to binary [-1, 1] by dividing output by range.
+    range = upper_range - lower_range
+
+    return mse
 
 
 """
