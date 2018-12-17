@@ -21,7 +21,7 @@ from deap import gp
 
 
 # Samples used to estimate the Rademacher complexity.
-num_estimate_samples = 500
+num_estimate_samples = 100
 
 
 def execute_algorithm():
@@ -98,90 +98,16 @@ def execute_algorithm():
     return statistics, population, halloffame
 
 
-"""
-===============================================================================================================
-
-    - Rademacher Complexity
-
-===============================================================================================================
-"""
-
-
-def rademacher_estimate(training_vector, classifier):
-
-    """
-    Given a (training) data-set, estimate the upper genralisation bounds using emperical Rademacher Complexity.
-    This is performed over a number of estimations taking the average, which will give close to the expected
-    value due to the law of large numbers (LLN).
-
-    :param training_vector: a vector of training data (pre-defined).
-    :param classifier: a function that generates an iterator over hypotheses given a data-set
-    """
-
-    totals = list()  # List of upper bounds from each iteration.
-
-    for i in range(num_estimate_samples):  # Iterating multiple times to get a good approximation.
-
-        # Generate a tuple of random_vector - random variables (+1, -1)
-        random_vector = rademacher_random_variable(len(training_vector))
-
-        # Finding the Rademacher correlations/bounds on the random_vector.
-        bounds = [h.correlation(training_vector, random_vector) for h in list(classifier(training_vector))]
-
-        # Adding the upper bound to the totals list.
-        totals.append(max(bounds))
-
-        print("==========================================================================")
-        print("Bounds:", bounds)
-        print("Upper Bounds:", max(bounds))
-        print("Iteration:", i)
-        print("==========================================================================")
-        print()
-
-    return sum(totals)/num_estimate_samples  # Averaging all the upper bounds to come up with the best estimate.
-
-
 def rademacher_random_variable(size):
 
     """
     Generate a desired number of rademacher_random_variable (with values {+1, -1})
 
     :param size: The number of Rademacher random variables to generate.
-    :return tuple: Tuple full of rademacher random variables.
+    :return tuple: Tuple full of Rademacher random variables.
     """
 
     return [np.random.randint(0, 1) * 2 - 1 for x in range(size)]
-
-
-def rademacher_correlation(self, training_vector, random_vector):
-
-    """
-    Return the rademacher correlation between a label assignment and the predictions of
-    the classifier
-
-    :param hypothesis_vector: A vector of the training data
-    :param random_vector: A vector of Rademacher random variables (+1/-1)
-    """
-
-    hypothesis_vector = [1 if (self.classify(d)) else -1 for d in training_vector]
-
-    # Product of random_vector
-    dot_product = float(np.dot(hypothesis_vector, random_vector))
-
-    # Number of features we are testing.
-    size = float(len(training_vector))
-
-    # Divide by size to push the number between 1 and -1.
-    correlation = dot_product / size
-
-    print("Training Vector:", training_vector)
-    print("Rademacher Vector:", random_vector)
-    print("Hypothesis Vector:", hypothesis_vector)
-    print("Dot Product:", dot_product)
-    print("Correlation:", correlation)
-    print()
-
-    return correlation
 
 
 """
@@ -191,6 +117,74 @@ def rademacher_correlation(self, training_vector, random_vector):
 
 ===============================================================================================================
 """
+
+
+def fitness_function_mse(individual, data, toolbox):
+
+    """
+    Calculates the fitness of a candidate solution/individual by using the mean
+    of the squared errors (MSE).
+
+    :param individual: Candidate Solution
+    :param data: Evaluation Data
+    :param toolbox: Evolutionary Operators
+    :return: Fitness Value
+    """
+
+    # Converts the expression tree into a callable function.
+    func = toolbox.compile(expr=individual)
+
+    # A list of predictions made by the individual on the training data.
+    hypothesis_vector = []
+
+    # The total (MSE) error made by the individual.
+    total_error = 0
+
+    for rows in range(data.shape[0]):
+
+        # Uses splat operator to convert array into positional arg.
+        pred = func(*(data.values[rows][0:data.shape[1]-1]))
+        real = data.values[rows][data.shape[1]-1]
+        hypothesis_vector.append(pred)
+
+        # Updating the total error made by the individual.
+        error = (real - pred)**2
+        total_error += error
+
+    output_range = max(hypothesis_vector) - min(hypothesis_vector)
+
+    if output_range != 0:
+        # Normalising the hypothesis output to a range of [1, -1].
+        for p in range(len(hypothesis_vector)):
+            hypothesis_vector[p] = hypothesis_vector[p]/output_range
+            if hypothesis_vector[p] >= 0: hypothesis_vector[p] = 1
+            if hypothesis_vector[p] < 0: hypothesis_vector[p] = -1
+
+    elif output_range == 0:
+        # All outputs set to 1, since the vector has 0 range.
+        for p in range(len(hypothesis_vector)):
+            hypothesis_vector[p] = 1
+
+    correlations = []
+
+    for i in range(num_estimate_samples):
+
+        # Generate a random_vector containing Rademacher random variables (+1, -1).
+        random_vector = rademacher_random_variable(len(config.training_data))
+
+        # Calculating the Rademacher correlation and adding to bounds list.
+        dot_product = float(np.dot(hypothesis_vector, random_vector))
+
+        # Calculating the correlation then making value between [1, 0].
+        correlation = dot_product/len(config.training_data)
+        correlations.append(correlation)
+
+    # Must return the value as a list object.
+    mse = [total_error / data.shape[0]][0]
+    bound = ((sum(correlations)/num_estimate_samples)+1)/2
+    fitness = mse + mse * bound
+
+    return [fitness]
 
 
 def fitness_function_ae(individual, data, toolbox):
@@ -249,43 +243,6 @@ def fitness_function_sse(individual, data, toolbox):
 
     # Must return the value as a list object.
     return [total_error]
-
-
-def fitness_function_mse(individual, data, toolbox):
-
-    """
-    Calculates the fitness of a candidate solution/individual by using the mean
-    of the squared errors (MSE).
-
-    :param individual: Candidate Solution
-    :param data: Evaluation Data
-    :param toolbox: Evolutionary Operators
-    :return: Fitness Value
-    """
-
-    # Converts the expression tree into a callable function.
-    func = toolbox.compile(expr=individual)
-    total_error = 0
-
-    upper_range = float("inf")
-    lower_range = float("-inf")
-
-    for rows in range(data.shape[0]):
-
-        # Uses splat operator to convert array into positional arg.
-        pred = func(*(data.values[rows][0:data.shape[1]-1]))
-        real = data.values[rows][data.shape[1]-1]
-
-        error = (real - pred)**2
-        total_error += error
-
-    # Must return the value as a list object.
-    mse = [total_error/data.shape[0]]
-
-    # Need to get the range of the output on training and convert to binary [-1, 1] by dividing output by range.
-    range = upper_range - lower_range
-
-    return mse
 
 
 """

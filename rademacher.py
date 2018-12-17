@@ -177,6 +177,7 @@ class PlaneHypothesis(Classifier):
 
 
 class OriginPlaneHypothesis(PlaneHypothesis):
+
     """
     A class that represents a decision boundary that must pass through the
     origin.
