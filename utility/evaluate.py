@@ -10,17 +10,6 @@ from sklearn.metrics import r2_score
 
 def evaluate_population(generation_num, generation_time, populations_fitnesses, populations_sizes, individual, func):
 
-    """
-
-    :param generation_num:
-    :param generation_time:
-    :param populations_fitnesses:
-    :param populations_sizes:
-    :param individual: The best individual
-    :param func: The best function (compiled individual)
-    :return:
-    """
-
     statistics = [generation_num + 1, generation_time]
 
     fitness_min = np.percentile(populations_fitnesses, 0)

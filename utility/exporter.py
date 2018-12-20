@@ -1,9 +1,10 @@
 import pandas as pd
 
 
-columns = ["generation_num", "generation_time", "fitness_min", "fitness_lq", "fitness_med", "fitness_uq", "fitness_max",
-                  "fitness_std", "fitness_mean", "size_min", "size_lq", "size_med", "size_uq", "size_max", "size_std",
-                  "size_mean", "mse", "rmse", "r2", "mae", "best_size", "best_solution"]
+columns = ["generation_num", "generation_time", "training_fitness_min", "training_fitness_lq", "training_fitness_med",
+           "training_fitness_uq", "training_fitness_max", "training_fitness_std", "training_fitness_mean", "size_min",
+           "size_lq", "size_med", "size_uq", "size_max", "size_std", "size_mean", "test_mse", "test_rmse", "test_r2",
+           "test_mae", "best_candidate_size", "best_candidate_solution"]
 
 
 def output_to_file(path, algorithm_name, file_number, data_name, statistics):

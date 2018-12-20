@@ -8,6 +8,7 @@ a domination based selection scheme. "Multi-Objective Methods for Tree Size
 Control" by Edwin D. de Jong, Jordan B. Pollack.
 """
 
+import random as rd
 import numpy as np
 import operator
 import time
@@ -230,7 +231,8 @@ pset.addPrimitive(np.multiply, 2)
 pset.addPrimitive(division, 2)
 
 # Adding some random terminals between a set range with a set #dp.
-pset.addEphemeralConstant("randomTerm4", lambda: round(np.random.uniform(config.random_lower, config.random_upper), 4))
+pset.addEphemeralConstant("randomTerm4", lambda:
+    round(rd.randint(config.random_lower*10000, config.random_upper*10000)/10000, 4))
 
 # Tell the algorithm that we are trying to minimise the fitness function.
 creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))

@@ -8,7 +8,7 @@ global variables in main.py and config.py are set to the required settings.
 """
 
 import pandas as pd
-import numpy as np
+import random as rd
 
 from utility.exporter import output_to_file
 from algorithms import config
@@ -33,7 +33,7 @@ def main():
     config.testing_data = test_data
 
     # Benchmark Genetic Programming Algorithms.
-    #run_benchmark_classic()
+    run_benchmark_classic()
     #run_benchmark_pareto_parsimony()
     #run_benchmark_diversity()
     #run_benchmark_spea2_parsimony()
@@ -68,8 +68,8 @@ def run_benchmark_classic():
     for i in range(config.executions):
 
         # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i]
-        np.random.seed(config.cur_seed)
+        config.cur_seed = config.seeds.iloc[i].values[0]
+        rd.seed(config.cur_seed)
 
         # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
         from algorithms.benchmark import benchmark_classic as algorithm
@@ -77,7 +77,7 @@ def run_benchmark_classic():
 
         # Outputs the statistics to a csv file which can be found in the output folder of the project.
         output_to_file(output_path, "benchmark-classic", i+1, data_name, statistics)
-
+        print("seed:", config.cur_seed)
         print("=== Benchmark Classic Execution " + str(i+1) + " Completed ===")
 
 
@@ -94,8 +94,8 @@ def run_benchmark_pareto_parsimony():
     for i in range(config.executions):
 
         # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i]
-        np.random.seed(config.cur_seed)
+        config.cur_seed = config.seeds.iloc[i].values[0]
+        rd.seed(config.cur_seed)
 
         # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
         from algorithms.benchmark import benchmark_pareto_parsimony as algorithm
@@ -121,8 +121,8 @@ def run_benchmark_diversity():
     for i in range(config.executions):
 
         # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i]
-        np.random.seed(config.cur_seed)
+        config.cur_seed = config.seeds.iloc[i].values[0]
+        rd.seed(config.cur_seed)
 
         # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
         from algorithms.benchmark import benchmark_diversity as algorithm
@@ -146,8 +146,8 @@ def run_benchmark_spea2_parsimony():
     for i in range(config.executions):
 
         # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i]
-        np.random.seed(config.cur_seed)
+        config.cur_seed = config.seeds.iloc[i].values[0]
+        rd.seed(config.cur_seed)
 
         # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
         from algorithms.benchmark import benchmark_spea2_parsimony as algorithm
@@ -182,8 +182,8 @@ def run_experimental_diversity():
     for i in range(config.executions):
 
         # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i]
-        np.random.seed(config.cur_seed)
+        config.cur_seed = config.seeds.iloc[i].values[0]
+        rd.seed(config.cur_seed)
 
         # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
         from algorithms.experimental import experimental_diversity as algorithm
@@ -208,8 +208,8 @@ def run_experimental_pareto_dimensionality():
     for i in range(config.executions):
 
         # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i]
-        np.random.seed(config.cur_seed)
+        config.cur_seed = config.seeds.iloc[i].values[0]
+        rd.seed(config.cur_seed)
 
         # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
         from algorithms.experimental import experimental_pareto_dimensionality as algorithm
@@ -234,8 +234,8 @@ def run_experimental_spea2_simplification():
     for i in range(config.executions):
 
         # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i]
-        np.random.seed(config.cur_seed)
+        config.cur_seed = config.seeds.iloc[i].values[0]
+        rd.seed(config.cur_seed)
 
         # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
         from algorithms.experimental import experimental_spea2_simplification as algorithm
@@ -260,8 +260,8 @@ def run_experimental_pareto_parsimony_linearity():
     for i in range(config.executions):
 
         # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i]
-        np.random.seed(config.cur_seed)
+        config.cur_seed = config.seeds.iloc[i].values[0]
+        rd.seed(config.cur_seed)
 
         # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
         from algorithms.experimental import experimental_pareto_parsimony_linearity as algorithm
@@ -285,8 +285,8 @@ def run_experimental_rademacher_complexity():
     for i in range(config.executions):
 
         # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i]
-        np.random.seed(config.cur_seed)
+        config.cur_seed = config.seeds.iloc[i].values[0]
+        rd.seed(config.cur_seed)
 
         # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
         from algorithms.experimental import experimental_rademacher_complexity as algorithm
