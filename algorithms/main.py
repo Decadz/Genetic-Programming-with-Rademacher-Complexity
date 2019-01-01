@@ -15,11 +15,11 @@ from algorithms import config
 
 
 # Path to the data-set which is getting tested.
-data_path_train = config.experimental_train_1
-data_path_test = config.experimental_test_1
+data_path_train = config.ld50_train
+data_path_test = config.ld50_test
 
-# Identification number of the data-set (appears in output file).
-data_name = "experimental"
+# Identification name of the data-set (appears in output file).
+data_name = "ld50"
 
 
 def main():
@@ -33,13 +33,13 @@ def main():
     config.testing_data = test_data
 
     # Benchmark Genetic Programming Algorithms.
-    run_benchmark_classic()
+    #run_benchmark_classic()
     #run_benchmark_pareto_parsimony()
     #run_benchmark_diversity()
     #run_benchmark_spea2_parsimony()
 
     # Experimental Genetic Programming Algorithms.
-    run_experimental_rademacher_complexity()
+    #run_experimental_rademacher_complexity()
     #run_experimental_diversity()                   # TODO - Implement Algorithm
     #run_experimental_pareto_dimensionality()       # TODO - Implement Algorithm
     #run_experimental_spea2_simplification()        # TODO - Implement Algorithm
@@ -77,7 +77,7 @@ def run_benchmark_classic():
 
         # Outputs the statistics to a csv file which can be found in the output folder of the project.
         output_to_file(output_path, "benchmark-classic", i+1, data_name, statistics)
-        print("seed:", config.cur_seed)
+
         print("=== Benchmark Classic Execution " + str(i+1) + " Completed ===")
 
 
