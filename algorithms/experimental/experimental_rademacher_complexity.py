@@ -13,7 +13,7 @@ import operator
 import time
 
 from utility.operators import division
-from utility.evaluate import evaluate_population
+from utility.evaluate import evaluate_population_rademacher
 
 from deap import base
 from deap import creator
@@ -46,15 +46,22 @@ def execute_algorithm():
         print("Generation: " + str(generation + 1) + "/" + str(config.num_generations))
         start_time = time.clock()  # Records the time at the start of the generation.
 
+        fits = []
+        errors = []
+        bounds = []
+
         # Evaluate the populations fitness.
         for individual, fitness in zip(population, list(map(toolbox.evaluate, population))):
             individual.fitness.values = fitness
 
+            fits.append(fitness[0])
+            errors.append(fitness[1])
+            bounds.append(fitness[2])
+
         # Update the hall of fame.
         halloffame.update(population)
 
-        # Gather all the fitness's and size information about the population.
-        fits = [individual.fitness.values[0] for individual in population]
+        # Gather all the size information about the population.
         size = [len(individual) for individual in population]
 
         # Cloning the population before performing genetic operators.
@@ -93,8 +100,8 @@ def execute_algorithm():
         end_time = time.clock()  # Records the time at the end of the generation.
 
         # Evaluates the population and returns statistics.
-        statistics.append(evaluate_population(generation, end_time - start_time, fits, size, halloffame[0],
-                                              toolbox.compile(expr=halloffame[0])))
+        statistics.append(evaluate_population_rademacher(generation, end_time - start_time, fits, errors, bounds, size,
+                                                         halloffame[0], toolbox.compile(expr=halloffame[0])))
 
     return statistics, population, halloffame
 
@@ -185,7 +192,7 @@ def fitness_function_mse(individual, data, toolbox):
     bound = ((sum(correlations)/num_estimate_samples)+1)/2
     fitness = mse + mse * bound
 
-    return [fitness]
+    return [fitness, mse, bound]
 
 
 def fitness_function_ae(individual, data, toolbox):
