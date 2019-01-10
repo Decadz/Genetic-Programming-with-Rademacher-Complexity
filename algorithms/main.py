@@ -19,7 +19,7 @@ data_path_train = config.ccn_train
 data_path_test = config.ccn_test
 
 # Identification name of the data-set (appears in output file).
-data_name = "ccn-v2"
+data_name = "ccn"
 
 
 def main():
@@ -39,11 +39,8 @@ def main():
     #run_benchmark_spea2_parsimony()
 
     # Experimental Genetic Programming Algorithms.
-    run_experimental_rademacher_complexity()
-    #run_experimental_diversity()                   # TODO - Implement Algorithm
-    #run_experimental_pareto_dimensionality()       # TODO - Implement Algorithm
-    #run_experimental_spea2_simplification()        # TODO - Implement Algorithm
-    #run_experimental_pareto_parsimony_linearity()  # TODO - Implement Algorithm
+    #run_experimental_rademacher_complexity()
+    run_experimental_rademacher_complexity_v2()
 
 
 """
@@ -168,111 +165,6 @@ def run_benchmark_spea2_parsimony():
 """
 
 
-def run_experimental_diversity():
-
-    """
-    A diversity maintaining implementation of Genetic Programming for Symbolic
-    Regression. This program aims to manage the diversity of individuals by using
-    a domination based selection scheme which penalises based on the order or
-    appearance and distance from the pareto frontier.
-    """
-
-    output_path = "../output/experimental_diversity/"
-
-    for i in range(config.executions):
-
-        # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i].values[0]
-        rd.seed(config.cur_seed)
-
-        # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
-        from algorithms.experimental import experimental_diversity as algorithm
-        statistics, population, halloffame = algorithm.execute_algorithm()
-
-        # Outputs the statistics to a csv file which can be found in the output folder of the project.
-        output_to_file(output_path, "experimental-diversity", i+1, data_name, statistics)
-
-        print("=== Experimental Diversity Execution " + str(i+1) + " Completed ===")
-
-
-def run_experimental_pareto_dimensionality():
-
-    """
-    A multi-objective (pareto) implementation of Genetic Programming for Symbolic
-    Regression. This program aims to optimise for both fitness and the dimensionality
-    of the problem (number of distinct features present).
-    """
-
-    output_path = "../output/experimental_pareto_dimensionality/"
-
-    for i in range(config.executions):
-
-        # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i].values[0]
-        rd.seed(config.cur_seed)
-
-        # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
-        from algorithms.experimental import experimental_pareto_dimensionality as algorithm
-        statistics, population, halloffame = algorithm.execute_algorithm()
-
-        # Outputs the statistics to a csv file which can be found in the output folder of the project.
-        output_to_file(output_path, "experimental-pareto-dimensionality", i+1, data_name, statistics)
-
-        print("=== Experimental Pareto Dimensionality Execution " + str(i+1) + " Completed ===")
-
-
-def run_experimental_spea2_simplification():
-
-    """
-    A multi-objective implementation of Genetic Programming for Symbolic Regression,
-    this program uses a modified version of the Strength Pareto Evolutionary Algorithm
-    (SPEA2) selection which simplifies the solutions in the archive.
-    """
-
-    output_path = "../output/experimental_spea2_simplification/"
-
-    for i in range(config.executions):
-
-        # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i].values[0]
-        rd.seed(config.cur_seed)
-
-        # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
-        from algorithms.experimental import experimental_spea2_simplification as algorithm
-        statistics, population, halloffame = algorithm.execute_algorithm()
-
-        # Outputs the statistics to a csv file which can be found in the output folder of the project.
-        output_to_file(output_path, "experimental-spea2-simplification", i+1, data_name, statistics)
-
-        print("=== Benchmark SPEA2 Simplification Execution " + str(i+1) + " Completed ===")
-
-
-def run_experimental_pareto_parsimony_linearity():
-
-    """
-    A multi-objective (pareto) implementation of Genetic Programming for Symbolic
-    Regression. This program aims to optimise for: fitness and parsimony (size of
-    expression tree) and non-linearity.
-    """
-
-    output_path = "../output/experimental_pareto_parsimony_linearity/"
-
-    for i in range(config.executions):
-
-        # Setting the seed (for reproducibility).
-        config.cur_seed = config.seeds.iloc[i].values[0]
-        rd.seed(config.cur_seed)
-
-        # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
-        from algorithms.experimental import experimental_pareto_parsimony_linearity as algorithm
-        statistics, population, halloffame = algorithm.execute_algorithm()
-
-        # Outputs the statistics to a csv file which can be found in the output folder of the project.
-        output_to_file(output_path, "experimental-pareto-parsimony-linearity", i+1, data_name, statistics)
-
-        print("=== Experimental Pareto Parsimony-Linearity Execution " + str(i+1) + " Completed ===")
-
-
 def run_experimental_rademacher_complexity():
 
     """
@@ -290,6 +182,32 @@ def run_experimental_rademacher_complexity():
 
         # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
         from algorithms.experimental import experimental_rademacher_complexity as algorithm
+        statistics, population, halloffame = algorithm.execute_algorithm()
+
+        # Outputs the statistics to a csv file which can be found in the output folder of the project.
+        output_to_file(output_path, "experimental-rademacher-complexity", i+1, data_name,
+                       statistics, rademacher_columns)
+
+        print("=== Experimental Rademacher Complexity Execution " + str(i+1) + " Completed ===")
+
+
+def run_experimental_rademacher_complexity_v2():
+
+    """
+    An experimental version of Genetic Programming which uses Rademacher Complexity
+    to estimate the generalisation error. (Used as an alternative to VC dimensions).
+    """
+
+    output_path = "../output/experimental_rademacher_complexity_v2/"
+
+    for i in range(config.executions):
+
+        # Setting the seed (for reproducibility).
+        config.cur_seed = config.seeds.iloc[i].values[0]
+        rd.seed(config.cur_seed)
+
+        # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
+        from algorithms.experimental import experimental_rademacher_complexity_v2 as algorithm
         statistics, population, halloffame = algorithm.execute_algorithm()
 
         # Outputs the statistics to a csv file which can be found in the output folder of the project.

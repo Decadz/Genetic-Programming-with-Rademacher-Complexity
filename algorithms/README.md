@@ -22,27 +22,6 @@ This program uses the Strength Pareto Evolutionary Algorithm (SPEA2) selection.
 
 ---
 
-### [experimental_diversity.py](https://github.com/Decadz/Genetic-Programming-for-Symbolic-Regression/blob/master/algorithms/experimental/experimental_diversity.py)
-- A diversity maintaining implementation of Genetic Programming for Symbolic
-Regression. This program aims to manage the diversity of individuals by using
-a domination based selection scheme which penalises based on the order or
-appearance and distance from the pareto frontier.
-
-### [experimental_pareto_dimensionality.py](https://github.com/Decadz/Genetic-Programming-for-Symbolic-Regression/blob/master/algorithms/experimental/experimental_pareto_dimensionality.py)
-- A multi-objective (pareto) implementation of Genetic Programming for Symbolic
-Regression. This program aims to optimise for both fitness and the dimensionality
-of the problem (number of distinct features present).
-
-### [experimental_spea2_simplification.py](https://github.com/Decadz/Genetic-Programming-for-Symbolic-Regression/blob/master/algorithms/experimental/experimental_spea2_simplification.py)
-- A multi-objective implementation of Genetic Programming for Symbolic Regression,
-this program uses a modified version of the Strength Pareto Evolutionary Algorithm
-(SPEA2) selection which simplifies the solutions in the archive.
-
-### [experimental_pareto_parsimony_linearity.py](https://github.com/Decadz/Genetic-Programming-for-Symbolic-Regression/blob/master/algorithms/experimental/experimental_pareto_parsimony_linearity.py)
-- A multi-objective (pareto) implementation of Genetic Programming for Symbolic
-Regression. This program aims to optimise for: fitness and parsimony (size of
-expression tree) and non-linearity.
-
 ### [experimental_rademacher_complexity.py](https://github.com/Decadz/Genetic-Programming-for-Symbolic-Regression/blob/master/algorithms/experimental/experimental_rademacher_complexity.py)
 - An experimental version of Genetic Programming which uses Rademacher Complexity
 to estimate the generalisation error. (Used as an alternative to VC dimensions).

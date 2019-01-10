@@ -9,11 +9,8 @@ iterations = 2  # Samples used to estimate the Rademacher correlation
 def main():
     training_vector = [(1., 1.), (2., 2.), (3., 0.), (4., 2.)]
 
-    rademacher_complexity_1 = rademacher_estimate(training_vector, constant_classifier)
-    rademacher_complexity_2 = rademacher_estimate(training_vector, origin_plane_classifier)
-
-    print("Rademacher correlation of constant classifier:", rademacher_complexity_1)
-    print("Rademacher correlation of origin centered plane classifier:", rademacher_complexity_2)
+    rademacher_complexity = rademacher_estimate(training_vector, origin_plane_classifier)
+    print("Rademacher correlation of origin centered plane classifier:", rademacher_complexity)
 
 
 """
@@ -90,6 +87,7 @@ class Classifier:
         :param random_vector: A vector of Rademacher random variables (+1/-1)
         """
 
+        print("Training Vector:", training_vector)
         hypothesis_vector = [1 if (self.classify(d)) else -1 for d in training_vector]
 
         # Product of random_vector
@@ -109,34 +107,6 @@ class Classifier:
         print()
 
         return correlation
-
-
-"""
-===============================================================================================================
-
-    - Constant Classifier
-    
-===============================================================================================================
-"""
-
-
-class ConstantClassifier(Classifier):
-    """
-    A classifier that always predicts that the output will be 1 or true.
-    """
-
-    def classify(self, point):
-        return True
-
-
-def constant_classifier(training_vector):
-    """
-    Given a dataset in R2, return an iterator over the single constant
-    hypothesis possible.
-    Args:
-      training_vector: The dataset to use to generate hypotheses
-    """
-    yield ConstantClassifier()
 
 
 """
@@ -205,35 +175,46 @@ def origin_plane_classifier(training_vector):
       training_vector: The dataset to use to generate hypotheses
     """
 
+    # Cloning the training data.
     copyDataset = np.array(training_vector)
 
     theta = np.multiply(np.arctan2(
         copyDataset[:, 1], copyDataset[:, 0]), 180 / np.pi)
-
+    print("Old Theta:", theta)
     theta.sort()
+    print("New Theta:", theta)
 
     hypothesesTheta = list()
 
+    # Merging the array so [1,2,3,4] -> [1.5, 2.5, 3.5]
     for idx in range(len(theta) - 1):
-
         if (theta[idx] != theta[idx + 1]):
             meanTheta = (theta[idx] + theta[idx + 1]) / 2
-
             hypothesesTheta.append(meanTheta)
 
     hypothesesTheta.append(theta[-1] + np.spacing(np.single(1)))
+    print("Hypo Theta:", hypothesesTheta)
 
     hypotheses = np.zeros((len(2 * hypothesesTheta), 2))
+    print("Final Hypo:", hypotheses)
+
     idx1 = 0
     for idx2, theta in enumerate(hypothesesTheta, 0):
+        print("Index 1: ", idx1)
+        print("Index 2: ", idx2)
+
+
         hypotheses[idx1][0] = -1
         hypotheses[idx1][1] = np.tan(hypothesesTheta[idx2])
+
         hypotheses[idx1 + 1][0] = 1
         hypotheses[idx1 + 1][1] = -np.tan(hypothesesTheta[idx2])
 
         idx1 += 2
 
+    print(hypotheses)
     for h in hypotheses:
+        print("OPH", OriginPlaneHypothesis(h[0], h[1]))
         yield OriginPlaneHypothesis(h[0], h[1])
 
 
