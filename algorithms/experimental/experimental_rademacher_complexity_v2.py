@@ -1,5 +1,5 @@
 __author__ = "Christian Raymond"
-__date__ = "10 January 2019"
+__date__ = "12 January 2019"
 
 """
 An experimental version of Genetic Programming for Symbolic Regression which uses 
@@ -9,16 +9,25 @@ Rademacher Complexity to estimate the generalisation error.
 import algorithms.config as config
 import random as rd
 import numpy as np
+import sympy as sp
+
 import operator
 import time
 
 from utility.operators import division
 from utility.evaluate import evaluate_population_rademacher
+from utility.formatter import convert_function
 
 from deap import base
 from deap import creator
 from deap import tools
 from deap import gp
+
+
+random_rademacher_vector = list()
+
+learning_rate = 0.01
+epochs = 100
 
 
 def execute_algorithm():
@@ -31,6 +40,10 @@ def execute_algorithm():
     :return population: Final Population
     :return halloffame: Best Individuals
     """
+
+    # Generate a random_vector containing Rademacher random variables (+1, -1).
+    for i in range(20):
+        random_rademacher_vector.append([rd.randint(0, 1) * 2 - 1 for x in range(len(config.training_data))])
 
     population = toolbox.population(n=config.size_population)
     halloffame = tools.HallOfFame(config.size_population*config.prob_elitism)
@@ -122,7 +135,56 @@ def execute_algorithm():
         statistics.append(evaluate_population_rademacher(generation, end_time - start_time, fitnesses, residuals,
                                 complexities, size, halloffame[0], toolbox.compile(expr=halloffame[0])))
 
+        # TODO - Implement Gradient Descent
+
+        best_individual = halloffame[0]
+        toolbox.gradient_descent(best_individual)
+
+        # TODO - Implement Gradient Descent
+
     return statistics, population, halloffame
+
+
+def gradient_descent(individual, expr, pset):
+
+    """
+
+    :param individual:
+    :param expr:
+    :param pset:
+    :return:
+    """
+
+    print("=======================================")
+    print("Original Individual:", individual)
+
+    # An array of all the indexes that contain coefficients.
+    ephemeral_indexes = [index for index, node in enumerate(individual) if isinstance(node, gp.Ephemeral)]
+
+    # Convert the individual into a sympy expression.
+    expr = sp.simplify(convert_function(individual))
+
+    print("SYMPY Function:", expr)
+    print("derivative:", sp.diff(expr))
+    print(expr.atoms(sp.Symbol))
+    print(expr.as_coefficients_dict())
+
+    # Perform gradient descent on the coefficients.
+    # only trying to find what to change co-efficents then we make
+    # the change on the deap individual.
+
+    # https://towardsdatascience.com/linear-regression-using-gradient-descent-97a6c8700931
+    # http://firsttimeprogrammer.blogspot.com/2014/09/multivariable-gradient-descent.html
+    # https://github.com/llSourcell/linear_regression_live/blob/master/demo.py
+
+    for i in ephemeral_indexes:
+        individual[i] = type(individual[i])()
+
+    print("Indexes:", ephemeral_indexes)
+    print("New Individual:", individual)
+    print("=======================================\n")
+
+
 
 
 """
@@ -217,17 +279,24 @@ def fitness_function_mse(individual, data, toolbox):
     # Finding the length of the training set.
     m = len(config.training_data)
 
-    # Generate a random_vector containing Rademacher random variables (+1, -1).
-    random_vector = [rd.randint(0, 1) * 2 - 1 for x in range(m)]
+    complexity = []
+    num_samples = 20
 
-    correlations = []
-    for i in range(m):
-        correlation = 0 if hypothesis_vector[i] == random_vector[i] else 1
-        correlations.append(correlation)
+    for s in range(num_samples):
+
+        # Generate a random_vector containing Rademacher random variables (+1, -1).
+        random_vector = random_rademacher_vector[s]
+
+        correlations = []
+        for i in range(m):
+            correlation = 0 if hypothesis_vector[i] == random_vector[i] else 1
+            correlations.append(correlation)
+
+        complexity.append(sum(correlations))
 
     # Calculating the rademacher complexity and multiply it by 2 to
     # transform its range from [0, 0.5] -> [0, 1].
-    hypothesis_complexity = 2 * (0.5 - (1/(2*m)) * sum(correlations))
+    hypothesis_complexity = 2 * (0.5 - (1/(2*m)) * (sum(complexity)/num_samples))
 
     """
     ====================================================================
@@ -259,10 +328,10 @@ def fitness_function_mse(individual, data, toolbox):
 pset = gp.PrimitiveSet("main", config.training_data.shape[1] - 1)
 
 # Adding operators to the primitive set.
-pset.addPrimitive(np.add, 2)
-pset.addPrimitive(np.subtract, 2)
-pset.addPrimitive(np.multiply, 2)
-pset.addPrimitive(division, 2)
+pset.addPrimitive(np.add, 2, name="add")
+pset.addPrimitive(np.subtract, 2, name="sub")
+pset.addPrimitive(np.multiply, 2, name="mul")
+pset.addPrimitive(division, 2, name="div")
 
 # Adding some random terminals between a set range with a set #dp.
 pset.addEphemeralConstant("randomTerm5", lambda:
@@ -285,6 +354,8 @@ toolbox.register("evaluate", fitness_function_mse, data=config.training_data, to
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
 toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
+
+toolbox.register("gradient_descent", gradient_descent, expr=toolbox.expr_mut, pset=pset)
 
 # Restricting size of expression tree to avoid bloat.
 toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter('height'), max_value=config.max_height))
