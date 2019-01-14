@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Number of executions of the algorithm.
-executions = 50
+executions = 1      # 50
 
 # Genetic Operators.
 prob_crossover = 0.9
@@ -12,8 +12,8 @@ prob_elitism = 0.1
 max_height = 10
 
 # Population and Generations.
-num_generations = 250
-size_population = 100
+num_generations = 50
+size_population = 250
 
 # Random terminal limits.
 random_upper = 1
@@ -37,9 +37,6 @@ ccun_test = "../data/ccun/ccun-testing.csv"
 
 cd_train = "../data/cd/cd-training.csv"
 cd_test = "../data/cd/cd-testing.csv"
-
-dlbcl_train = "../data/dlbcl/dlbcl-training.csv"
-dlbcl_test = "../data/dlbcl/dlbcl-testing.csv"
 
 ld50_train = "../data/ld50/ld50-training.csv"
 ld50_test = "../data/ld50/ld50-testing.csv"

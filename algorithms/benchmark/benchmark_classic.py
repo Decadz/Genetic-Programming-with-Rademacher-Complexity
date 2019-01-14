@@ -68,7 +68,7 @@ def execute_algorithm():
         while len(children) < config.size_population:
 
             # Generating a number to determine what genetic operator.
-            rng = np.random.random()
+            rng = rd.random()
 
             # Performing crossover genetic operator.
             if rng < config.prob_crossover:

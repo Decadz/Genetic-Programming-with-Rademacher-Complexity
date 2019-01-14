@@ -10,47 +10,47 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-num_samples = 2
+num_samples = 31
 
 classic_cd_path = "../output/benchmark_classic/benchmark-classic-cd-"
 classic_ccn_path = "../output/benchmark_classic/benchmark-classic-ccn-"
 classic_ccun_path = "../output/benchmark_classic/benchmark-classic-ccun-"
 classic_ld50_path = "../output/benchmark_classic/benchmark-classic-ld50-"
 
-rademacher_cd_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-cd-v4-"
-rademacher_ccn_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-ccn-v2-"
-rademacher_ccun_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-ccun-v2-"
-rademacher_ld50_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-ld50-v2-"
+rademacher_cd_path = "../output/experimental_rademacher_complexity_v2/experimental-rademacher-complexity-cd-"
+rademacher_ccn_path = "../output/experimental_rademacher_complexity_v2/experimental-rademacher-complexity-ccn-v2-"
+rademacher_ccun_path = "../output/experimental_rademacher_complexity_v2/experimental-rademacher-complexity-ccun-v2-"
+rademacher_ld50_path = "../output/experimental_rademacher_complexity_v2/experimental-rademacher-complexity-ld50-v2-"
 
 
 def main():
 
     # Loading the Genetic Programming classic output data.
-    classic_cd = load_data(classic_cd_path)
-    #classic_ccn = load_data(classic_ccn_path)
+    #classic_cd = load_data(classic_cd_path)
+    classic_ccn = load_data(classic_ccn_path)
     #classic_ccun = load_data(classic_ccun_path)
     #classic_ld50 = load_data(classic_ld50_path)
 
     # Loading the Genetic Programming with Rademacher Complexity output data.
-    rademacher_cd = load_data(rademacher_cd_path)
-    #rademacher_ccn = load_data(rademacher_ccn_path)
+    #rademacher_cd = load_data(rademacher_cd_path)
+    rademacher_ccn = load_data(rademacher_ccn_path)
     #rademacher_ccun = load_data(rademacher_ccun_path)
     #rademacher_ld50 = load_data(rademacher_ld50_path)
 
     # Analysing the Genetic Programming classic output data.
-    bc1 = analyse_classic(classic_cd, "benchmark-classic", "cd")
-    #bc2 = analyse_classic(classic_ccn, "benchmark-classic", "ccn")
+    #bc1 = analyse_classic(classic_cd, "benchmark-classic", "cd")
+    bc2 = analyse_classic(classic_ccn, "benchmark-classic", "ccn")
     #bc3 = analyse_classic(classic_ccun, "benchmark-classic", "ccun")
     #bc4 = analyse_classic(classic_ld50, "benchmark-classic", "ld50")
 
     # Analysing the Genetic Programming with Rademacher Complexity output data.
-    er1 = analyse_rademacher(rademacher_cd, "experimental-rademacher", "cd")
-    #er2 = analyse_rademacher(rademacher_ccn, "experimental-rademacher", "ccn")
+    #er1 = analyse_rademacher(rademacher_cd, "experimental-rademacher", "cd")
+    er2 = analyse_rademacher(rademacher_ccn, "experimental-rademacher", "ccn")
     #er3 = analyse_rademacher(rademacher_ccun, "experimental-rademacher", "ccun")
     #er4 = analyse_rademacher(rademacher_ld50, "experimental-rademacher", "ld50")
 
-    visualise(bc1, "benchmark-classic", er1, "experimental-rademacher", "CD")
-    #visualise(bc2, "benchmark-classic", er2, "experimental-rademacher", "CCN")
+    #visualise(bc1, "benchmark-classic", er1, "experimental-rademacher", "CD")
+    visualise(bc2, "benchmark-classic", er2, "experimental-rademacher", "CCN")
     #visualise(bc3, "benchmark-classic", er3, "experimental-rademacher", "CCUN")
     #visualise(bc4, "benchmark-classic", er4, "experimental-rademacher", "LD50")
 
@@ -132,7 +132,6 @@ def analyse_rademacher(data, algorithm_name, data_name):
     """
     Merges the data (taking the averages across all runs) and than extracts the key information.
     The pandas dataframe in exported to a csv file which appears in the analysis folder.
-
     :param data:
     :param algorithm_name:
     :param data_name:
@@ -283,6 +282,7 @@ def visualise_size(df1, df1_name, df2, df2_name, dataset_name):
 
     # Saving the diagram to the analysis folder (CWD).
     plt.savefig("classic-vs-rademacher-size-" + dataset_name + ".png")
+    plt.show()
     plt.close()
 
 

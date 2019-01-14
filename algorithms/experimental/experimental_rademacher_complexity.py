@@ -1,5 +1,5 @@
 __author__ = "Christian Raymond"
-__date__ = "14 December 2018"
+__date__ = "12 January 2019"
 
 """
 An experimental version of Genetic Programming for Symbolic Regression which uses 
@@ -9,6 +9,7 @@ Rademacher Complexity to estimate the generalisation error.
 import algorithms.config as config
 import random as rd
 import numpy as np
+
 import operator
 import time
 
@@ -21,8 +22,11 @@ from deap import tools
 from deap import gp
 
 
-# Samples used to estimate the Rademacher complexity.
-num_estimate_samples = 100
+error_theta = 0.5
+complexity_theta = 0.5
+
+# Random rademacher vector which contains [1, -1] values.
+random_rademacher_vector = list()
 
 
 def execute_algorithm():
@@ -37,7 +41,7 @@ def execute_algorithm():
     """
 
     population = toolbox.population(n=config.size_population)
-    halloffame = tools.HallOfFame(config.size_population*config.prob_elitism)
+    halloffame = tools.HallOfFame(config.size_population * config.prob_elitism)
     statistics = []
 
     # Begin the evolution process.
@@ -46,17 +50,53 @@ def execute_algorithm():
         print("Generation: " + str(generation + 1) + "/" + str(config.num_generations))
         start_time = time.clock()  # Records the time at the start of the generation.
 
-        fits = []
-        errors = []
-        bounds = []
+        # Reseting the random vector list so it is empty before populating.
+        random_rademacher_vector.clear()
+
+        # Generate a random_vector containing Rademacher random variables (+1, -1).
+        for i in range(20):
+            random_rademacher_vector.append([rd.randint(0, 1) * 2 - 1 for x in range(len(config.training_data))])
+
+        """
+        ====================================================================
+        The new evaluation method below. (Note this is not important to the 
+        concept, just a work around required due to the DEAP implementation).
+        Records all the errors and complexities then noramlises the errors
+        before adding them to the complexities.
+        ====================================================================
+        """
+
+        residuals = []
+        complexities = []
+        fitnesses = []
 
         # Evaluate the populations fitness.
         for individual, fitness in zip(population, list(map(toolbox.evaluate, population))):
-            individual.fitness.values = fitness
+            residuals.append(fitness[0])
+            complexities.append(fitness[1])
 
-            fits.append(fitness[0])
-            errors.append(fitness[1])
-            bounds.append(fitness[2])
+        # Calculating the range of the residuals/errors so we can normalise.
+        error_max = max(residuals)
+        error_min = min(residuals)
+        error_range = error_max - error_min
+
+        for index, individual in enumerate(population):
+
+            # Calculating the individuals fitness.
+            ind_error = error_theta*(residuals[index] / error_range)
+            ind_complexity = complexity_theta*(complexities[index])
+            ind_fitness = ind_error + ind_complexity
+
+            # Calculating and setting the new fitness value.
+            fitnesses.append(ind_fitness)
+            individual.fitness.values = [fitnesses[index]]
+
+        """ 
+        ====================================================================
+        End of new evaluation method - the rest of this function is same as
+        the classic implementation of genetic programming. 
+        ====================================================================
+        """
 
         # Update the hall of fame.
         halloffame.update(population)
@@ -78,7 +118,7 @@ def execute_algorithm():
         while len(children) < config.size_population:
 
             # Generating a number to determine what genetic operator.
-            rng = np.random.random()
+            rng = rd.random()
 
             # Performing crossover genetic operator.
             if rng < config.prob_crossover:
@@ -100,22 +140,11 @@ def execute_algorithm():
         end_time = time.clock()  # Records the time at the end of the generation.
 
         # Evaluates the population and returns statistics.
-        statistics.append(evaluate_population_rademacher(generation, end_time - start_time, fits, errors, bounds, size,
-                                                         halloffame[0], toolbox.compile(expr=halloffame[0])))
+        statistics.append(evaluate_population_rademacher(generation, end_time - start_time, fitnesses, residuals,
+                                                         complexities, size, halloffame[0],
+                                                         toolbox.compile(expr=halloffame[0])))
 
     return statistics, population, halloffame
-
-
-def rademacher_random_variable(size):
-
-    """
-    Generate a desired number of rademacher_random_variable (with values {+1, -1})
-
-    :param size: The number of Rademacher random variables to generate.
-    :return tuple: Tuple full of Rademacher random variables.
-    """
-
-    return [rd.randint(0, 1) * 2 - 1 for x in range(size)]
 
 
 """
@@ -131,12 +160,21 @@ def fitness_function_mse(individual, data, toolbox):
 
     """
     Calculates the fitness of a candidate solution/individual by using the mean
-    of the squared errors (MSE).
+    of the squared errors (MSE). Function also returns the rademacher complexity
+    as a 2nd argument.
 
     :param individual: Candidate Solution
     :param data: Evaluation Data
     :param toolbox: Evolutionary Operators
-    :return: Fitness Value
+    :return: mean squared error [0], rademacher complexity [1]
+    """
+
+    """
+    ====================================================================
+    Calculating the MSE as per a typical fitness function in GP, the 
+    only difference is that we want to record the predictions for use
+    later in a hypothesis vector (since we don't want to recalculate it).
+    ====================================================================
     """
 
     # Converts the expression tree into a callable function.
@@ -149,108 +187,91 @@ def fitness_function_mse(individual, data, toolbox):
     total_error = 0
 
     for rows in range(data.shape[0]):
-
         # Uses splat operator to convert array into positional arg.
-        pred = func(*(data.values[rows][0:data.shape[1]-1]))
-        real = data.values[rows][data.shape[1]-1]
+        pred = func(*(data.values[rows][0:data.shape[1] - 1]))
+        real = data.values[rows][data.shape[1] - 1]
         hypothesis_vector.append(pred)
 
         # Updating the total error made by the individual.
-        error = (real - pred)**2
+        error = (real - pred) ** 2
         total_error += error
+
+    """
+    ====================================================================
+    The rademacher complexity is used in a binary classification, so we
+    need to convert the output range of the hypothesis to [0, 1], 
+    currently we have a continuous value output since we are performing
+    (symbolic) regression. 
+    ====================================================================
+    """
 
     output_range = max(hypothesis_vector) - min(hypothesis_vector)
 
     if output_range != 0:
         # Normalising the hypothesis output to a range of [1, -1].
         for p in range(len(hypothesis_vector)):
-            hypothesis_vector[p] = hypothesis_vector[p]/output_range
+            hypothesis_vector[p] = hypothesis_vector[p] / output_range
             if hypothesis_vector[p] >= 0: hypothesis_vector[p] = 1
             if hypothesis_vector[p] < 0: hypothesis_vector[p] = -1
 
     elif output_range == 0:
-        # All outputs set to 1, since the vector has 0 range.
+        # All outputs set to 1, since the vector has 0 range. This is
+        # called when on functions such as f = argXi - where there is
+        # no range, just a constant output.
         for p in range(len(hypothesis_vector)):
             hypothesis_vector[p] = 1
 
-    correlations = []
+    """
+    ====================================================================
+    This is where the calculation of the rademacher complexity happens.
+    A random rademacher vector "r" the same length as the training set is
+    generated, which contains [+1, -1] values. This vector is compared to
+    the hypothesis vector "h" recorded prior. 
 
-    for i in range(num_estimate_samples):
+    When the value of ri and hi agree the resulting correlation value is
+    0 when they disagree the correlation value is 1. 
+        i.e.    (1, 1) & (-1, -1) = 0
+                (1, -1) & (-1, 1) = 1
+    ====================================================================
+    """
 
-        # Generate a random_vector containing Rademacher random variables (+1, -1).
-        random_vector = rademacher_random_variable(len(config.training_data))
+    # Finding the length of the training set.
+    m = len(config.training_data)
 
-        # Calculating the Rademacher correlation and adding to bounds list.
-        dot_product = float(np.dot(hypothesis_vector, random_vector))
+    complexity = []
+    num_samples = 20
 
-        # Calculating the correlation then making value between [1, 0].
-        correlation = dot_product/len(config.training_data)
-        correlations.append(correlation)
+    for s in range(num_samples):
 
-    # Must return the value as a list object.
+        random_vector = random_rademacher_vector[s]
+
+        correlations = []
+        for i in range(m):
+            correlation = 0 if hypothesis_vector[i] == random_vector[i] else 1
+            correlations.append(correlation)
+
+        complexity.append(sum(correlations))
+
+    # Calculating the rademacher complexity and multiply it by 2 to
+    # transform its range from [0, 0.5] -> [0, 1].
+    hypothesis_complexity = 2 * (0.5 - (1 / (2 * m)) * (sum(complexity) / num_samples))
+
+    """
+    ====================================================================
+    Returning both the mse and the rademacher complexity, note that we 
+    do not add the training error to the rademacher complexity yet since
+    we need to normalise the populations errors first to [0, 1] which 
+    cannot be done in the fitness function.
+    ====================================================================
+    """
+
+    # Mean squared error - must return the error value as a list object.
     mse = [total_error / data.shape[0]][0]
-    bound = ((sum(correlations)/num_estimate_samples)+1)/2
-    fitness = mse + mse * bound
 
-    return [fitness, mse, bound]
+    # The rademacher complexity of this current hypothesis/candidate solution.
+    rademacher_complexity = hypothesis_complexity
 
-
-def fitness_function_ae(individual, data, toolbox):
-
-    """
-    Calculates the fitness of a candidate solution/individual by using the absolute
-    value of the errors (AE).
-
-    :param individual: Candidate Solution
-    :param data: Evaluation Data
-    :param toolbox: Evolutionary Operators
-    :return: Fitness Value
-    """
-
-    # Converts the expression tree into a callable function.
-    func = toolbox.compile(expr=individual)
-    total_error = 0
-
-    for rows in range(data.shape[0]):
-
-        # Uses splat operator to convert array into positional arg.
-        pred = func(*(data.values[rows][0:data.shape[1]-1]))
-        real = data.values[rows][data.shape[1]-1]
-
-        error = abs(real - pred)
-        total_error += error
-
-    # Must return the value as a list object.
-    return [total_error]
-
-
-def fitness_function_sse(individual, data, toolbox):
-
-    """
-    Calculates the fitness of a candidate solution/individual by using the sum of
-    the squared errors (SSE).
-
-    :param individual: Candidate Solution
-    :param data: Evaluation Data
-    :param toolbox: Evolutionary Operators
-    :return: Fitness Value
-    """
-
-    # Converts the expression tree into a callable function.
-    func = toolbox.compile(expr=individual)
-    total_error = 0
-
-    for rows in range(data.shape[0]):
-
-        # Uses splat operator to convert array into positional arg.
-        pred = func(*(data.values[rows][0:data.shape[1]-1]))
-        real = data.values[rows][data.shape[1]-1]
-
-        error = (real - pred)**2
-        total_error += error
-
-    # Must return the value as a list object.
-    return [total_error]
+    return [mse, rademacher_complexity]
 
 
 """
@@ -265,14 +286,14 @@ def fitness_function_sse(individual, data, toolbox):
 pset = gp.PrimitiveSet("main", config.training_data.shape[1] - 1)
 
 # Adding operators to the primitive set.
-pset.addPrimitive(np.add, 2)
-pset.addPrimitive(np.subtract, 2)
-pset.addPrimitive(np.multiply, 2)
-pset.addPrimitive(division, 2)
+pset.addPrimitive(np.add, 2, name="add")
+pset.addPrimitive(np.subtract, 2, name="sub")
+pset.addPrimitive(np.multiply, 2, name="mul")
+pset.addPrimitive(division, 2, name="div")
 
 # Adding some random terminals between a set range with a set #dp.
-pset.addEphemeralConstant("randomTerm5", lambda:
-    round(rd.randint(config.random_lower*10000, config.random_upper*10000)/10000, 4))
+pset.addEphemeralConstant("randomTerm2", lambda:
+round(rd.randint(config.random_lower * 10000, config.random_upper * 10000) / 10000, 4))
 
 # Tell the algorithm that we are trying to minimise the fitness function.
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))

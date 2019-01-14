@@ -5,16 +5,9 @@
 #### Benchmark
 
 - Classic Genetic Programming
-- Multi-Objective Parsimony-Fitness Genetic Programming
-- Diversity Maintenance Genetic Programming
-- Strength Pareto Evolutionary Algorithm II Genetic Programming
 
 #### Experimental 
 
-- Diversity Genetic Programming
-- Multi-Objective Dimensionality-Fitness Genetic Programming
-- Strength Pareto Evolutionary Algorithm II Genetic Programming with Simplification
-- Multi-Objective Parsimony-Linearity-Fitness Genetic Programming
 - Rademacher Complexity Genetic Programming
 
 ### [Data](https://github.com/Decadz/Genetic-Programming-for-Symbolic-Regression/tree/master/data)
