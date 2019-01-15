@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Number of executions of the algorithm.
-executions = 1      # 50
+executions = 5      # 50
 
 # Genetic Operators.
 prob_crossover = 0.9

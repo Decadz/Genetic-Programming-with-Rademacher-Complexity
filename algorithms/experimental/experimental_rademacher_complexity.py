@@ -1,5 +1,5 @@
 __author__ = "Christian Raymond"
-__date__ = "12 January 2019"
+__date__ = "15 January 2019"
 
 """
 An experimental version of Genetic Programming for Symbolic Regression which uses 
@@ -22,8 +22,11 @@ from deap import tools
 from deap import gp
 
 
-error_theta = 0.5
-complexity_theta = 0.5
+error_theta = 0.1
+complexity_theta = 0.9
+
+# Number of samples to take the average of.
+number_samples = 20
 
 # Random rademacher vector which contains [1, -1] values.
 random_rademacher_vector = list()
@@ -54,7 +57,7 @@ def execute_algorithm():
         random_rademacher_vector.clear()
 
         # Generate a random_vector containing Rademacher random variables (+1, -1).
-        for i in range(20):
+        for i in range(number_samples):
             random_rademacher_vector.append([rd.randint(0, 1) * 2 - 1 for x in range(len(config.training_data))])
 
         """

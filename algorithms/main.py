@@ -16,7 +16,7 @@ from algorithms import config
 
 # Path to the data-set which is getting tested.
 data_path_train = config.ccn_train
-data_path_test = config.ccn_test
+data_path_test = config.ccun_test
 
 # Identification name of the data-set (appears in output file).
 data_name = "ccn"

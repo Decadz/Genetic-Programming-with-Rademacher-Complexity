@@ -9,18 +9,20 @@ implementations. Outputs data to the analysis folder.
 import pandas as pd
 import matplotlib.pyplot as plt
 
+import algorithms.config as config
 
-num_samples = 31
+
+num_samples = 5
 
 classic_cd_path = "../output/benchmark_classic/benchmark-classic-cd-"
 classic_ccn_path = "../output/benchmark_classic/benchmark-classic-ccn-"
 classic_ccun_path = "../output/benchmark_classic/benchmark-classic-ccun-"
 classic_ld50_path = "../output/benchmark_classic/benchmark-classic-ld50-"
 
-rademacher_cd_path = "../output/experimental_rademacher_complexity_v2/experimental-rademacher-complexity-cd-"
-rademacher_ccn_path = "../output/experimental_rademacher_complexity_v2/experimental-rademacher-complexity-ccn-v2-"
-rademacher_ccun_path = "../output/experimental_rademacher_complexity_v2/experimental-rademacher-complexity-ccun-v2-"
-rademacher_ld50_path = "../output/experimental_rademacher_complexity_v2/experimental-rademacher-complexity-ld50-v2-"
+rademacher_cd_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-"
+rademacher_ccn_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-ccn-"
+rademacher_ccun_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-ccun-"
+rademacher_ld50_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-ld50-"
 
 
 def main():
@@ -104,7 +106,7 @@ def analyse_classic(data, algorithm_name, data_name):
         gen_time.append(data[index][["generation_time"]])
         training_fitness.append(data[index][["training_fitness_min"]])
         testing_fitness.append(data[index][["test_mse"]])
-        size_med.append(data[index][["size_med"]])
+        size_med.append(data[index][["size_mean"]])
 
     result = list()
 
@@ -151,7 +153,7 @@ def analyse_rademacher(data, algorithm_name, data_name):
         gen_time.append(data[index][["generation_time"]])
         training_fitness.append(data[index][["errors_min"]])
         testing_fitness.append(data[index][["test_mse"]])
-        size_med.append(data[index][["size_med"]])
+        size_med.append(data[index][["size_mean"]])
 
     result = list()
 
@@ -225,7 +227,7 @@ def visualise_error(df1, df1_name, df2, df2_name, dataset_name):
     error4 = df2[df2["Testing Error"] == df2["Testing Error"].max()]
 
     # Setting the range of the visible axis's.
-    plt.axis([0, 250, 0, max(error1["Training Error"].values[0], error2["Training Error"].values[0],
+    plt.axis([0, config.num_generations, 0, max(error1["Training Error"].values[0], error2["Training Error"].values[0],
                              error3["Testing Error"].values[0], error4["Testing Error"].values[0])])
 
     # Plotting both the training and testing error for dataframe 1.
@@ -269,7 +271,7 @@ def visualise_size(df1, df1_name, df2, df2_name, dataset_name):
     size2 = df2[df2["Average Size"] == df2["Average Size"].max()]
 
     # Setting the range of the visible axis's.
-    plt.axis([0, 250, 0, max(size1["Average Size"].values[0], size2["Average Size"].values[0])])
+    plt.axis([0, config.num_generations, 0, max(size1["Average Size"].values[0], size2["Average Size"].values[0])])
 
     # Plotting the program size for dataframe 1.
     plt.plot(df1[["Generation Number"]], df1["Average Size"], label=df1_name)
