@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Number of executions of the algorithm.
-executions = 5      # 50
+executions = 50
 
 # Genetic Operators.
 prob_crossover = 0.9
@@ -12,8 +12,8 @@ prob_elitism = 0.1
 max_height = 10
 
 # Population and Generations.
-num_generations = 50
-size_population = 250
+num_generations = 100
+size_population = 500
 
 # Random terminal limits.
 random_upper = 1

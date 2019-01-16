@@ -20,11 +20,11 @@ classic_ccn_path = "../output/benchmark_classic/benchmark-classic-ccn-"
 classic_ccun_path = "../output/benchmark_classic/benchmark-classic-ccun-"
 classic_ld50_path = "../output/benchmark_classic/benchmark-classic-ld50-"
 
-rademacher_cd_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-cd-0.1-0.9-"
-rademacher_cd_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-cd-0.1-0.9-"
-rademacher_ccn_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-ccn-0.1-0.9-"
-rademacher_ccun_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-ccun-0.1-0.9-"
-rademacher_ld50_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-ld50-0.1-0.9-"
+rademacher_cd_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-cd-0.5-0.5-"
+rademacher_cd_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-cd-0.5-0.5-"
+rademacher_ccn_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-ccn-0.5-0.5-"
+rademacher_ccun_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-ccun-0.5-0.5-"
+rademacher_ld50_path = "../output/experimental_rademacher_complexity/experimental-rademacher-complexity-ld50-0.5-0.5-"
 
 
 def main():

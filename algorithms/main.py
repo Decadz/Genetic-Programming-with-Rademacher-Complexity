@@ -19,7 +19,7 @@ data_path_train = config.ccun_train
 data_path_test = config.ccun_test
 
 # Identification name of the data-set (appears in output file).
-data_name = "ccun-0.1-0.9"
+data_name = "ccun"
 
 
 def main():
@@ -33,7 +33,7 @@ def main():
     config.testing_data = test_data
 
     # Benchmark Genetic Programming Algorithms.
-    #run_benchmark_classic()
+    run_benchmark_classic()
 
     # Experimental Genetic Programming Algorithms.
     run_experimental_rademacher_complexity()

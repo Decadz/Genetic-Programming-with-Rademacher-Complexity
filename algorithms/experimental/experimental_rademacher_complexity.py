@@ -22,8 +22,8 @@ from deap import tools
 from deap import gp
 
 
-error_theta = 0.1
-complexity_theta = 0.9
+error_theta = 0.5
+complexity_theta = 0.5
 
 # Number of samples to take the average of.
 number_samples = 20
