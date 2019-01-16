@@ -12,6 +12,7 @@ import numpy as np
 
 import operator
 import time
+import math
 
 from utility.operators import division
 from utility.evaluate import evaluate_population_rademacher
@@ -22,8 +23,8 @@ from deap import tools
 from deap import gp
 
 
-error_theta = 0.1
-complexity_theta = 0.9
+error_theta = 0.5
+complexity_theta = 0.5
 
 # Number of samples to take the average of.
 number_samples = 20
@@ -60,46 +61,20 @@ def execute_algorithm():
         for i in range(number_samples):
             random_rademacher_vector.append([rd.randint(0, 1) * 2 - 1 for x in range(len(config.training_data))])
 
-        """
-        ====================================================================
-        The new evaluation method below. (Note this is not important to the 
-        concept, just a work around required due to the DEAP implementation).
-        Records all the errors and complexities then noramlises the errors
-        before adding them to the complexities.
-        ====================================================================
-        """
-
         residuals = []
         complexities = []
         fitnesses = []
 
         # Evaluate the populations fitness.
         for individual, fitness in zip(population, list(map(toolbox.evaluate, population))):
-            residuals.append(fitness[0])
-            complexities.append(fitness[1])
 
-        # Calculating the range of the residuals/errors so we can normalise.
-        error_max = max(residuals)
-        error_min = min(residuals)
-        error_range = error_max - error_min
+            # Recording the fitness, relative squared error and complexity.
+            fitnesses.append(fitness[0])
+            residuals.append(fitness[1])
+            complexities.append(fitness[2])
 
-        for index, individual in enumerate(population):
-
-            # Calculating the individuals fitness.
-            ind_error = error_theta*(residuals[index] / error_range)
-            ind_complexity = complexity_theta*(complexities[index])
-            ind_fitness = ind_error + ind_complexity
-
-            # Calculating and setting the new fitness value.
-            fitnesses.append(ind_fitness)
-            individual.fitness.values = [fitnesses[index]]
-
-        """ 
-        ====================================================================
-        End of new evaluation method - the rest of this function is same as
-        the classic implementation of genetic programming. 
-        ====================================================================
-        """
+            # Setting the fitness value for the individual.
+            individual.fitness.values = [fitness[0]]
 
         # Update the hall of fame.
         halloffame.update(population)
@@ -159,22 +134,22 @@ def execute_algorithm():
 """
 
 
-def fitness_function_mse(individual, data, toolbox):
+def fitness_function_rse(individual, data, toolbox):
 
     """
-    Calculates the fitness of a candidate solution/individual by using the mean
-    of the squared errors (MSE). Function also returns the rademacher complexity
-    as a 2nd argument.
+    Calculates the fitness of a candidate solution/individual by using the relative
+    squared errors (RSE). Function also returns the rademacher complexity as a 2nd
+    argument.
 
     :param individual: Candidate Solution
     :param data: Evaluation Data
     :param toolbox: Evolutionary Operators
-    :return: mean squared error [0], rademacher complexity [1]
+    :return: individual fitness [0], relative squared error [1], rademacher complexity [2]
     """
 
     """
     ====================================================================
-    Calculating the MSE as per a typical fitness function in GP, the 
+    Calculating the RSE as per a typical fitness function in GP, the 
     only difference is that we want to record the predictions for use
     later in a hypothesis vector (since we don't want to recalculate it).
     ====================================================================
@@ -186,18 +161,33 @@ def fitness_function_mse(individual, data, toolbox):
     # A list of predictions made by the individual on the training data.
     hypothesis_vector = []
 
-    # The total (MSE) error made by the individual.
-    total_error = 0
+    # A list of the actual training labels (from the training set).
+    actual_vector = []
+
+    # A list of the errors/residuals made by the hypothesis.
+    error_vector = []
 
     for rows in range(data.shape[0]):
         # Uses splat operator to convert array into positional arg.
         pred = func(*(data.values[rows][0:data.shape[1] - 1]))
         real = data.values[rows][data.shape[1] - 1]
+
         hypothesis_vector.append(pred)
+        actual_vector.append(real)
+        error_vector.append((real - pred) ** 2)
 
         # Updating the total error made by the individual.
         error = (real - pred) ** 2
-        total_error += error
+
+    # The mean value of the actual target.
+    mean_actual = sum(actual_vector)/data.shape[0]
+
+    # A vector of the errors between the mean output and actual outputs.
+    relative_error_vector = []
+
+    for rows in range(data.shape[0]):
+        error = (mean_actual - real) ** 2
+        relative_error_vector.append(error)
 
     """
     ====================================================================
@@ -268,13 +258,16 @@ def fitness_function_mse(individual, data, toolbox):
     ====================================================================
     """
 
-    # Mean squared error - must return the error value as a list object.
-    mse = [total_error / data.shape[0]][0]
+    # Relative Squared Error - must return the error value as a list object.
+    rse = error_theta * sum(error_vector)/sum(relative_error_vector)
 
     # The rademacher complexity of this current hypothesis/candidate solution.
-    rademacher_complexity = hypothesis_complexity
+    rademacher_complexity = complexity_theta * hypothesis_complexity
 
-    return [mse, rademacher_complexity]
+    # The fitness of the individual rse*param1 + complexity*param2.
+    fitness = rse + rademacher_complexity
+
+    return [fitness, rse, rademacher_complexity]
 
 
 """
@@ -311,7 +304,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("compile", gp.compile, pset=pset)
 
 toolbox.register("select", tools.selTournament, tournsize=2)
-toolbox.register("evaluate", fitness_function_mse, data=config.training_data, toolbox=toolbox)
+toolbox.register("evaluate", fitness_function_rse, data=config.training_data, toolbox=toolbox)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
 toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut, pset=pset)

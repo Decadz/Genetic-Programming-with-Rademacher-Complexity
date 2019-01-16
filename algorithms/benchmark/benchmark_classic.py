@@ -105,12 +105,54 @@ def execute_algorithm():
 """
 
 
+def fitness_function_rse(individual, data, toolbox):
+
+    """
+    Calculates the fitness of a candidate solution/individual by using the relative
+    squared error (RSE).
+
+    :param individual: Candidate Solution
+    :param data: Evaluation Data
+    :param toolbox: Evolutionary Operators
+    :return: Fitness Value
+    """
+
+    # Converts the expression tree into a callable function.
+    func = toolbox.compile(expr=individual)
+    total_error = 0
+
+    actual_output = []
+
+    for rows in range(data.shape[0]):
+
+        # Uses splat operator to convert array into positional arg.
+        pred = func(*(data.values[rows][0:data.shape[1]-1]))
+        real = data.values[rows][data.shape[1]-1]
+
+        error = (real - pred) ** 2
+        total_error += error
+
+        # Recording all the real outputs.
+        actual_output.append(real)
+
+    # The mean value of the actual target.
+    mean_actual = sum(actual_output)/len(actual_output)
+
+    relative_error = 0
+
+    for rows in range(data.shape[0]):
+        error = (mean_actual - actual_output[rows]) ** 2
+        relative_error += error
+
+    # Must return the value as a list object.
+    return [total_error/relative_error]
+
+
 def fitness_function_ae(individual, data, toolbox):
 
     """
     Calculates the fitness of a candidate solution/individual by using the absolute
     value of the errors (AE).
-
     :param individual: Candidate Solution
     :param data: Evaluation Data
     :param toolbox: Evolutionary Operators
@@ -226,7 +268,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("compile", gp.compile, pset=pset)
 
 toolbox.register("select", tools.selTournament, tournsize=2)
-toolbox.register("evaluate", fitness_function_mse, data=config.training_data, toolbox=toolbox)
+toolbox.register("evaluate", fitness_function_rse, data=config.training_data, toolbox=toolbox)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
 toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut, pset=pset)

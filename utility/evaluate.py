@@ -45,9 +45,20 @@ def evaluate_population(generation_num, generation_time, populations_fitnesses, 
     rmse = sqrt(mean_squared_error(real, pred))
     r2 = r2_score(real, pred)
     mae = median_absolute_error(real, pred)
+
+    # Solving the relative squared error (RAE).
+    squared_error = 0
+    relative_error = 0
+
+    for i in range(len(real)):
+        squared_error += (pred[i] - real[i]) ** 2
+        relative_error += (sum(real)/len(real) - real[i]) ** 2
+
+    rse = squared_error/relative_error
+
     size = len(individual)
 
-    statistics.extend([mse, rmse, r2, mae, size, str(individual)])
+    statistics.extend([mse, rmse, r2, mae, rse, size, str(individual)])
 
     return statistics
 
@@ -112,8 +123,19 @@ def evaluate_population_rademacher(generation_num, generation_time, populations_
     rmse = sqrt(mean_squared_error(real, pred))
     r2 = r2_score(real, pred)
     mae = median_absolute_error(real, pred)
+
+    # Solving the relative squared error (RAE).
+    squared_error = 0
+    relative_error = 0
+
+    for i in range(len(real)):
+        squared_error += (pred[i] - real[i]) ** 2
+        relative_error += (sum(real) / len(real) - real[i]) ** 2
+
+    rse = squared_error / relative_error
+
     size = len(individual)
 
-    statistics.extend([mse, rmse, r2, mae, size, str(individual)])
+    statistics.extend([mse, rmse, r2, mae, rse, size, str(individual)])
 
     return statistics
