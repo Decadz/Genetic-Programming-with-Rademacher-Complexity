@@ -15,11 +15,11 @@ from algorithms import config
 
 
 # Path to the data-set which is getting tested.
-data_path_train = config.ld50_train
-data_path_test = config.ld50_test
+data_path_train = config.ccun_train
+data_path_test = config.ccun_test
 
 # Identification name of the data-set (appears in output file).
-data_name = "ld50"
+data_name = "ccun-0.1-0.9"
 
 
 def main():

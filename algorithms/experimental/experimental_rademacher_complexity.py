@@ -12,7 +12,6 @@ import numpy as np
 
 import operator
 import time
-import math
 
 from utility.operators import division
 from utility.evaluate import evaluate_population_rademacher
@@ -23,8 +22,8 @@ from deap import tools
 from deap import gp
 
 
-error_theta = 0.5
-complexity_theta = 0.5
+error_theta = 0.1
+complexity_theta = 0.9
 
 # Number of samples to take the average of.
 number_samples = 20
