@@ -191,7 +191,7 @@ def fitness_function_rse(individual, data, toolbox):
     """
     ====================================================================
     The rademacher complexity is used in a binary classification, so we
-    need to convert the output range of the hypothesis to [0, 1], 
+    need to convert the output range of the hypothesis to [-1, 1], 
     currently we have a continuous value output since we are performing
     (symbolic) regression. 
     ====================================================================
@@ -250,10 +250,8 @@ def fitness_function_rse(individual, data, toolbox):
 
     """
     ====================================================================
-    Returning both the mse and the rademacher complexity, note that we 
-    do not add the training error to the rademacher complexity yet since
-    we need to normalise the populations errors first to [0, 1] which 
-    cannot be done in the fitness function.
+    Calculating the fitness of the individual by adding the rse*theta1 + 
+    complexity*theta2.
     ====================================================================
     """
 
