@@ -15,11 +15,11 @@ from algorithms import config
 
 
 # Path to the data-set which is getting tested.
-data_path_train = config.ccun_train
-data_path_test = config.ccun_test
+data_path_train = config.experimental_train_1
+data_path_test = config.experimental_test_1
 
 # Identification name of the data-set (appears in output file).
-data_name = "ccun"
+data_name = "experimental"
 
 
 def main():
@@ -33,7 +33,7 @@ def main():
     config.testing_data = test_data
 
     # Benchmark Genetic Programming Algorithms.
-    run_benchmark_classic()
+    #run_benchmark_classic()
 
     # Experimental Genetic Programming Algorithms.
     run_experimental_rademacher_complexity()

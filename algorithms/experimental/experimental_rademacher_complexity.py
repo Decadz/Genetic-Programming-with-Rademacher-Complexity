@@ -22,8 +22,7 @@ from deap import tools
 from deap import gp
 
 
-error_theta = 0.5
-complexity_theta = 0.5
+alpha = 1
 
 # Number of samples to take the average of.
 number_samples = 20
@@ -67,13 +66,15 @@ def execute_algorithm():
         # Evaluate the populations fitness.
         for individual, fitness in zip(population, list(map(toolbox.evaluate, population))):
 
+            individual_fitness = fitness[0] * (generation/config.num_generations)
+
             # Recording the fitness, relative squared error and complexity.
-            fitnesses.append(fitness[0])
+            fitnesses.append(individual_fitness)
             residuals.append(fitness[1])
             complexities.append(fitness[2])
 
             # Setting the fitness value for the individual.
-            individual.fitness.values = [fitness[0]]
+            individual.fitness.values = [individual_fitness]
 
         # Update the hall of fame.
         halloffame.update(population)
@@ -244,9 +245,7 @@ def fitness_function_rse(individual, data, toolbox):
 
         complexity.append(sum(correlations))
 
-    # Calculating the rademacher complexity and multiply it by 2 to
-    # transform its range from [0, 0.5] -> [0, 1].
-    hypothesis_complexity = 2 * (0.5 - (1 / (2 * m)) * (sum(complexity) / num_samples))
+    hypothesis_complexity = sum(complexity) * (1/num_samples) * (1/m)
 
     """
     ====================================================================
@@ -256,13 +255,13 @@ def fitness_function_rse(individual, data, toolbox):
     """
 
     # Relative Squared Error - must return the error value as a list object.
-    rse = error_theta * sum(error_vector)/sum(relative_error_vector)
+    rse = sum(error_vector)/sum(relative_error_vector)
 
     # The rademacher complexity of this current hypothesis/candidate solution.
-    rademacher_complexity = complexity_theta * hypothesis_complexity
+    rademacher_complexity = hypothesis_complexity
 
     # The fitness of the individual rse*param1 + complexity*param2.
-    fitness = rse + rademacher_complexity
+    fitness = rse + alpha * rademacher_complexity
 
     return [fitness, rse, rademacher_complexity]
 
@@ -304,7 +303,7 @@ toolbox.register("select", tools.selTournament, tournsize=2)
 toolbox.register("evaluate", fitness_function_rse, data=config.training_data, toolbox=toolbox)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
-toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
+toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
 # Restricting size of expression tree to avoid bloat.
 toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter('height'), max_value=config.max_height))
