@@ -1,10 +1,11 @@
 __author__ = "Christian Raymond"
-__date__ = "07 December 2018"
+__date__ = "05 February 2019"
 
 """
-This is the primary script which is used to execute all the various implementations
-of Genetic Programming for Symbolic Regression. To run this script make sure the 
-global variables in main.py and config.py are set to the required settings. 
+This is the primary script which is used to execute multiple runs of Genetic Programming (GP)
+for Symbolic Regression. To run this script make sure the global variables in main.py and 
+config.py are set to the required settings. Note that any implementations of GP must use the
+random library for a rng, as opposed to np etc. to ensure seeding works correctly. 
 """
 
 import pandas as pd
@@ -15,11 +16,11 @@ from algorithms import config
 
 
 # Path to the data-set which is getting tested.
-data_path_train = config.experimental_train_1
-data_path_test = config.experimental_test_1
+data_path_train = config.cd_train
+data_path_test = config.cd_test
 
 # Identification name of the data-set (appears in output file).
-data_name = "experimental"
+data_name = "cd"
 
 
 def main():
@@ -33,22 +34,13 @@ def main():
     config.testing_data = test_data
 
     # Benchmark Genetic Programming Algorithms.
-    #run_benchmark_classic()
+    run_genetic_programming_classic()
 
     # Experimental Genetic Programming Algorithms.
-    run_experimental_rademacher_complexity()
+    run_genetic_programming_rademacher_complexity()
 
 
-"""
-===============================================================================================================
-
-    - Benchmark Genetic Programming Algorithms
-
-===============================================================================================================
-"""
-
-
-def run_benchmark_classic():
+def run_genetic_programming_classic():
 
     """
     A classic implementation of Genetic Programming for Symbolic Regression.
@@ -56,7 +48,7 @@ def run_benchmark_classic():
     of a symbolic representation (expression trees) and evolutionary techniques.
     """
 
-    output_path = "../output/benchmark_classic/"
+    output_path = "../output/genetic-programming-classic/"
 
     for i in range(config.executions):
 
@@ -65,32 +57,23 @@ def run_benchmark_classic():
         rd.seed(config.cur_seed)
 
         # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
-        from algorithms.benchmark import benchmark_classic as algorithm
+        from algorithms import genetic_programming_classic as algorithm
         statistics, population, halloffame = algorithm.execute_algorithm()
 
         # Outputs the statistics to a csv file which can be found in the output folder of the project.
-        output_to_file(output_path, "benchmark-classic", i+1, data_name, statistics, default_columns)
+        output_to_file(output_path, "gp-classic", i+1, data_name, statistics, default_columns)
 
-        print("=== Benchmark Classic Execution " + str(i+1) + " Completed ===")
-
-
-"""
-===============================================================================================================
-
-    - Experimental Genetic Programming Algorithms
-
-===============================================================================================================
-"""
+        print("=== Genetic Programming Classic Implementation Execution " + str(i+1) + " Completed ===")
 
 
-def run_experimental_rademacher_complexity():
+def run_genetic_programming_rademacher_complexity():
 
     """
-    An experimental version of Genetic Programming which uses Rademacher Complexity
-    to estimate the generalisation error. (Used as an alternative to VC dimensions).
+    An experimental version of Genetic Programming for Symbolic Regression which uses
+    the Rademacher Complexity to estimate the complexity of a hypothesis.
     """
 
-    output_path = "../output/experimental_rademacher_complexity/"
+    output_path = "../output/genetic-programming-rademacher-complexity/"
 
     for i in range(config.executions):
 
@@ -99,14 +82,14 @@ def run_experimental_rademacher_complexity():
         rd.seed(config.cur_seed)
 
         # Run the algorithm and return the statistics, the final population and the best runs (hall of fame).
-        from algorithms.experimental import experimental_rademacher_complexity as algorithm
+        from algorithms import genetic_programming_rademacher_complexity as algorithm
         statistics, population, halloffame = algorithm.execute_algorithm()
 
         # Outputs the statistics to a csv file which can be found in the output folder of the project.
-        output_to_file(output_path, "experimental-rademacher-complexity", i+1, data_name,
+        output_to_file(output_path, "gp-rc", i+1, data_name,
                        statistics, rademacher_columns)
 
-        print("=== Experimental Rademacher Complexity Execution " + str(i+1) + " Completed ===")
+        print("=== Genetic Programming with Rademacher Complexity Execution " + str(i+1) + " Completed ===")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,1 @@
+The output folder for Genetic Programming for Symbolic Regression (classic implementation).
