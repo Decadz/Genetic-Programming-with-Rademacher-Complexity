@@ -139,8 +139,7 @@ def fitness_function_rse(individual, data, toolbox):
 
     """
     Calculates the fitness of a candidate solution/individual by using the relative
-    squared errors (RSE). Function also returns the rademacher complexity as a 2nd
-    argument.
+    squared errors (RSE) and the Rademacher Complexity.
 
     :param individual: Candidate Solution
     :param data: Evaluation Data
@@ -250,15 +249,17 @@ def fitness_function_rse(individual, data, toolbox):
 
     """
     ====================================================================
-    Calculating the fitness of the individual by adding the rse*theta1 + 
-    complexity*theta2.
+    Calculating the fitness of the individual by adding the 
+    rse*alpha*complexity. Note that the curgen/maxgen parameter is added
+    later in the evolutionary process function, since it is easier to 
+    implement in DEAP.
     ====================================================================
     """
 
-    # Relative Squared Error - must return the error value as a list object.
+    # Relative Squared Error
     rse = sum(error_vector)/sum(relative_error_vector)
 
-    # The rademacher complexity of this current hypothesis/candidate solution.
+    # The Rademacher Complexity of this current hypothesis/candidate solution.
     rademacher_complexity = hypothesis_complexity
 
     # The fitness of the individual rse*param1 + complexity*param2.
