@@ -22,12 +22,13 @@ from deap import tools
 from deap import gp
 
 
+# Parameter for the pressure on the complexity in the fitness evaluation.
 alpha = 1
 
-# Number of samples to take the average of.
+# Number of samples/observation when taking the Rademacher Complexity.
 number_samples = 20
 
-# Random rademacher vector which contains [1, -1] values.
+# Random Rademacher vector which contains [1, -1] values.
 random_rademacher_vector = list()
 
 
