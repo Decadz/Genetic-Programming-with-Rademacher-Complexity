@@ -199,21 +199,12 @@ def fitness_function_rse(individual, data, toolbox):
     ====================================================================
     """
 
-    output_range = max(hypothesis_vector) - min(hypothesis_vector)
+    # Finding the mid range of the outputs.
+    mid_range = (min(hypothesis_vector) - max(hypothesis_vector))/2
 
-    if output_range != 0:
-        # Normalising the hypothesis output to a range of [1, -1].
-        for p in range(len(hypothesis_vector)):
-            hypothesis_vector[p] = hypothesis_vector[p] / output_range
-            if hypothesis_vector[p] >= 0: hypothesis_vector[p] = 1
-            if hypothesis_vector[p] < 0: hypothesis_vector[p] = -1
-
-    elif output_range == 0:
-        # All outputs set to 1, since the vector has 0 range. This is
-        # called when on functions such as f = argXi - where there is
-        # no range, just a constant output.
-        for p in range(len(hypothesis_vector)):
-            hypothesis_vector[p] = 1
+    for p in range(len(hypothesis_vector)):
+        if hypothesis_vector[p] >= mid_range: hypothesis_vector[p] = 1
+        if hypothesis_vector[p] < mid_range: hypothesis_vector[p] = -1
 
     """
     ====================================================================
